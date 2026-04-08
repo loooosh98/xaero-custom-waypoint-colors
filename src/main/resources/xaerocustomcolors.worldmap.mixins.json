@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "com.xaerocustomcolors.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "WorldMapWaypointMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

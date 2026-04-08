@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "xaerocustomcolors",
+  "version": "${version}",
+  "name": "Xaero Custom Waypoint Colors",
+  "description": "Adds a color picker option to Xaero's Minimap waypoints, letting them go beyond the 16 preset colors.",
+  "authors": [
+    "loooosh98"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/xaero-custom-waypoint-colors",
+    "sources": "https://github.com/loooosh98/xaero-custom-waypoint-colors",
+    "issues": "https://github.com/loooosh98/xaero-custom-waypoint-colors/issues"
+  },
+  "license": "MIT",
+  "accessWidener": "xaerocustomcolors.accesswidener",
+  "icon": "assets/xaerocustomcolors/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.xaerocustomcolors.XaeroCustomColors"
+    ]
+  },
+  "mixins": [
+    "xaerocustomcolors.mixins.json",
+    "xaerocustomcolors.worldmap.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api":   "*",
+    "minecraft":    "~1.21.11",
+    "xaerominimap": "*"
+  },
+  "suggests": {
+    "xaeroworldmap": "*"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.xaerocustomcolors.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "DropDownWidgetMixin",
+    "GuiAddWaypointMixin",
+    "MinimapWaypointMixin",
+    "WaypointColorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
