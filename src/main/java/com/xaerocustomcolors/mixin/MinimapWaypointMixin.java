@@ -24,6 +24,13 @@ public class MinimapWaypointMixin {
     @Unique private transient Integer xcc_cachedColor;
     @Unique private transient long    xcc_cacheVersion = -1;
 
+    /**
+     * Saves the custom colour for a waypoint when it's created via the edit
+     * screen's OK button.  The {@code insideConfirm} flag guarantees we only
+     * fire during GuiAddWaypoint.confirmMutual — NOT during world load, which
+     * would otherwise stamp the stale WaypointScreenState colour onto every
+     * waypoint in the new world.
+     */
     @Inject(
         method = "<init>(IIILjava/lang/String;Ljava/lang/String;Lxaero/hud/minimap/waypoint/WaypointColor;Lxaero/hud/minimap/waypoint/WaypointPurpose;ZZ)V",
         at = @At("RETURN")
@@ -33,7 +40,9 @@ public class MinimapWaypointMixin {
             WaypointColor color, WaypointPurpose purpose,
             boolean temporary, boolean yIncluded,
             CallbackInfo ci) {
-        if (WaypointScreenState.hasCustomColor && name != null && !name.isEmpty()) {
+        if (WaypointScreenState.insideConfirm
+                && WaypointScreenState.hasCustomColor
+                && name != null && !name.isEmpty()) {
             CustomColorManager.INSTANCE.setCustomColor(
                     CustomColorManager.makeKey(name, x, y, z),
                     WaypointScreenState.customColor);

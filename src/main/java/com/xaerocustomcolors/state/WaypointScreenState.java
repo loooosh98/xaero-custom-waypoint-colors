@@ -8,6 +8,11 @@ public class WaypointScreenState {
     public static boolean justPickedColor = false;
     /** Index into the colorDD options array that holds the custom entry. */
     public static int customSlotIndex = -1;
+    /** True only while we're inside GuiAddWaypoint.confirmMutual (i.e. the user
+     *  clicked OK).  Guards the Waypoint constructor inject so it only writes
+     *  colors for waypoints created by user confirmation — NOT for waypoints
+     *  Xaero is loading from disk during a world switch. */
+    public static boolean insideConfirm = false;
 
     public static void reset() {
         customColor     = 0xFFFFFFFF;
