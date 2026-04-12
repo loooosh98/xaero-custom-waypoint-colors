@@ -9,10 +9,6 @@ import net.minecraft.text.Text;
 
 import java.util.function.Consumer;
 
-/**
- * A full-screen color picker with a hue bar and saturation/value (SV) square.
- * Compatible with MC 1.21.11's revamped rendering and input API.
- */
 public class ColorPickerScreen extends Screen {
 
     private static final int PADDING    = 10;
@@ -47,10 +43,6 @@ public class ColorPickerScreen extends Screen {
         this.callback = callback;
         fromArgb(initialArgb);
     }
-
-    // -------------------------------------------------------------------------
-    // Lifecycle
-    // -------------------------------------------------------------------------
 
     @Override
     protected void init() {
@@ -93,16 +85,8 @@ public class ColorPickerScreen extends Screen {
         refreshFields();
     }
 
-    // -------------------------------------------------------------------------
-    // Render
-    // -------------------------------------------------------------------------
-
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
-        // DO NOT call renderBackground here — in MC 1.21.11 the game renderer
-        // already calls it before invoking render(), so calling it again throws
-        // "Can only blur once per frame".
-
         // Panel background + border
         ctx.fill(panelX,     panelY,     panelX + PANEL_W,     panelY + PANEL_H,     0xDD1A1A1A);
         ctx.fill(panelX,     panelY,     panelX + PANEL_W,     panelY + 1,           0xFFAAAAAA);
@@ -112,31 +96,25 @@ public class ColorPickerScreen extends Screen {
 
         ctx.drawCenteredTextWithShadow(textRenderer, title, panelX + PANEL_W / 2, panelY + 8, 0xFFFFFF);
 
-        // SV square — rendered as vertical gradient strips per column
         drawSVSquare(ctx);
 
-        // SV cursor
         int curX = svX + Math.round(sat * (PICKER_SIZE - 1));
         int curY = svY + Math.round((1f - val) * (PICKER_SIZE - 1));
         ctx.fill(curX - 3, curY - 3, curX + 4, curY + 4, 0xFFFFFFFF);
         ctx.fill(curX - 2, curY - 2, curX + 3, curY + 3, 0xFF000000);
         ctx.fill(curX - 1, curY - 1, curX + 2, curY + 2, 0xFFFFFFFF);
 
-        // Hue bar
         drawHueBar(ctx);
 
-        // Hue cursor
         int hcX = hueX + Math.round(hue * (hueBarW - 1));
         ctx.fill(hcX - 1, hueY - 2, hcX + 2, hueY + HUE_BAR_H + 2, 0xFFFFFFFF);
         ctx.fill(hcX,     hueY - 1, hcX + 1, hueY + HUE_BAR_H + 1, 0xFF000000);
 
-        // Color preview swatch
         int swatchX = panelX + PANEL_W - PADDING - 32;
         int swatchY = hueY + HUE_BAR_H + 12;
         ctx.fill(swatchX - 1, swatchY - 1, swatchX + 33, swatchY + 37, 0xFFAAAAAA);
         ctx.fill(swatchX, swatchY, swatchX + 32, swatchY + 36, getCurrentArgb());
 
-        // Field labels
         int fieldsY = hueY + HUE_BAR_H + 12;
         ctx.drawTextWithShadow(textRenderer, Text.literal("Hex:"), panelX + PADDING, fieldsY - 9, 0xCCCCCC);
         int compY = fieldsY + 24;
@@ -147,11 +125,7 @@ public class ColorPickerScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
     }
 
-    /**
-     * Draws the SV square as PICKER_SIZE vertical strips using fillGradient.
-     * Each column at saturation s goes from hsvToArgb(hue, s, 1) at top to black at bottom.
-     */
-    private static final int STRIP_W = 3; // pixels per strip — reduces draw calls ~3x
+    private static final int STRIP_W = 3;
 
     private void drawSVSquare(DrawContext ctx) {
         for (int col = 0; col < PICKER_SIZE; col += STRIP_W) {
@@ -169,10 +143,6 @@ public class ColorPickerScreen extends Screen {
             ctx.fill(hueX + col, hueY, right, hueY + HUE_BAR_H, hsvToArgb(h, 1f, 1f));
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Mouse input — new MC 1.21.11 Click-based API
-    // -------------------------------------------------------------------------
 
     @Override
     public boolean mouseClicked(Click click, boolean shifted) {
@@ -228,10 +198,6 @@ public class ColorPickerScreen extends Screen {
         refreshFields();
     }
 
-    // -------------------------------------------------------------------------
-    // Text fields
-    // -------------------------------------------------------------------------
-
     private void onHexInput(String text) {
         if (updatingFields) return;
         String t = text.startsWith("#") ? text.substring(1) : text;
@@ -273,10 +239,6 @@ public class ColorPickerScreen extends Screen {
         updatingFields = false;
     }
 
-    // -------------------------------------------------------------------------
-    // Color helpers
-    // -------------------------------------------------------------------------
-
     private int getCurrentArgb() {
         return hsvToArgb(hue, sat, val);
     }
@@ -305,7 +267,6 @@ public class ColorPickerScreen extends Screen {
         return 0xFF000000 | (Math.round(r * 255) << 16) | (Math.round(g * 255) << 8) | Math.round(b * 255);
     }
 
-    /** Converts RGB to HSV and writes the result directly into this instance's fields. */
     private void rgbToHsv(int ri, int gi, int bi) {
         float r = ri / 255f, g = gi / 255f, b = bi / 255f;
         float mx = Math.max(r, Math.max(g, b)), mn = Math.min(r, Math.min(g, b)), d = mx - mn;
@@ -322,10 +283,6 @@ public class ColorPickerScreen extends Screen {
 
     private static float clamp01(float v) { return Math.max(0f, Math.min(1f, v)); }
     private static int   clamp255(int v)  { return Math.max(0, Math.min(255, v)); }
-
-    // -------------------------------------------------------------------------
-    // Close
-    // -------------------------------------------------------------------------
 
     @Override
     public void close() {

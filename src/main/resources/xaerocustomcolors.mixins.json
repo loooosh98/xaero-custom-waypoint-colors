@@ -5,6 +5,7 @@
   "client": [
     "DropDownWidgetMixin",
     "GuiAddWaypointMixin",
+    "GuiWaypointsMixin",
     "MinimapWaypointMixin",
     "WaypointColorMixin"
   ],

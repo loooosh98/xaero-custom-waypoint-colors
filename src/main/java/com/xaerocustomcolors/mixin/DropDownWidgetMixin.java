@@ -11,13 +11,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
 
-/**
- * Intercepts {@code selectId} so that clicking the custom-colour slot
- * opens the colour picker even when it is already selected.
- * {@code selectId} normally skips the {@code onSelected} callback when
- * {@code id == selected}, so the GuiAddWaypointMixin inject never fires
- * for a re-click on the active custom entry.
- */
+// Handles re-clicking the already-selected custom slot (selectId skips onSelected
+// when id == selected, so GuiAddWaypointMixin's inject wouldn't fire).
 @Mixin(value = DropDownWidget.class, remap = false)
 public class DropDownWidgetMixin {
 
@@ -27,7 +22,7 @@ public class DropDownWidgetMixin {
     private void xcc_reopenPickerOnCustomReselect(int id, boolean callCallback, CallbackInfo ci) {
         if (!callCallback) return;
         if (id != WaypointScreenState.customSlotIndex) return;
-        if (id != selected) return; // different slot — let onSelected in GuiAddWaypointMixin handle it
+        if (id != selected) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
         Screen screen = client.currentScreen;

@@ -7,14 +7,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xaero.hud.minimap.waypoint.WaypointColor;
 
-/**
- * Intercepts WaypointColor.getHex() to return a custom RGB when
- * MinimapWaypointMixin has set ColorInterceptState.pendingCustomHex.
- *
- * The two mixins together form a ThreadLocal bridge that piggybacks on the
- *   waypoint.getWaypointColor().getHex()
- * call chain used by every Xaero renderer (minimap HUD, waypoint list GUI).
- */
 @Mixin(value = WaypointColor.class, remap = false)
 public class WaypointColorMixin {
 

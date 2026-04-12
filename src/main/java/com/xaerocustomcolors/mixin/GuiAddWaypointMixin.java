@@ -6,14 +6,17 @@ import com.xaerocustomcolors.gui.ColorPickerScreen;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xaero.common.gui.GuiAddWaypoint;
 import xaero.common.minimap.waypoints.Waypoint;
+import xaero.lib.client.config.ClientConfigManager;
 import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
 
 import java.util.ArrayList;
@@ -24,61 +27,63 @@ public class GuiAddWaypointMixin {
     @Shadow private ArrayList<Waypoint> waypointsEdited;
     @Shadow private DropDownWidget colorDD;
 
-    /**
-     * Marks that we're inside confirmMutual so the Waypoint constructor inject
-     * in MinimapWaypointMixin can safely fire for user-created waypoints.
-     */
-    @Inject(method = "confirmMutual", at = @At("HEAD"))
-    private void xcc_enterConfirm(CallbackInfo ci) {
-        WaypointScreenState.insideConfirm = true;
-    }
+    // Pre-save keys (name:x:y:z) for detecting renames / coord changes.
+    @Unique private String[] xcc_oldKeys;
 
-    /**
-     * Persist / remove the custom colour when the user clicks OK (edit mode),
-     * then clear {@code insideConfirm} and any stale custom-colour state so
-     * it can't leak across worlds.
-     */
-    @Inject(method = "confirmMutual", at = @At("RETURN"))
-    private void xcc_applyCustomColor(CallbackInfo ci) {
-        try {
-            if (waypointsEdited == null || waypointsEdited.isEmpty()) return;
-
-            // Check what's actually selected in the dropdown right now.
-            boolean customIsSelected = XaeroCustomColors.isCustomSlotSelected(
-                    (Screen)(Object) this);
-
-            if (customIsSelected && WaypointScreenState.hasCustomColor) {
-                // User confirmed with the custom colour selected — persist it.
-                for (Waypoint wp : waypointsEdited) {
-                    CustomColorManager.INSTANCE.setCustomColor(
-                            CustomColorManager.makeKey(wp.getName(), wp.getX(), wp.getY(), wp.getZ()),
-                            WaypointScreenState.customColor);
-                }
-                CustomColorManager.INSTANCE.save();
-            } else if (!customIsSelected) {
-                // User confirmed with a preset selected — remove any saved custom colour.
-                boolean changed = false;
-                for (Waypoint wp : waypointsEdited) {
-                    changed |= CustomColorManager.INSTANCE.removeCustomColor(
-                            CustomColorManager.makeKey(wp.getName(), wp.getX(), wp.getY(), wp.getZ()));
-                }
-                if (changed) CustomColorManager.INSTANCE.save();
+    // OK button handler — where Xaero creates new / mutates existing waypoints.
+    // lambda$init$3 is compiler-generated; verify name on every Xaero update.
+    @Inject(method = "lambda$init$3", at = @At("HEAD"))
+    private void xcc_enterSave(ClientConfigManager config, ButtonWidget btn, CallbackInfo ci) {
+        if (waypointsEdited != null) {
+            xcc_oldKeys = new String[waypointsEdited.size()];
+            for (int i = 0; i < waypointsEdited.size(); i++) {
+                Waypoint wp = waypointsEdited.get(i);
+                xcc_oldKeys[i] = CustomColorManager.makeKey(
+                        wp.getName(), wp.getX(), wp.getY(), wp.getZ());
             }
-        } finally {
-            // Always clear the confirm flag and wipe custom state — AFTER_INIT
-            // will re-load it from disk next time the screen opens.  This is
-            // what prevents stale state from leaking into world switches.
-            WaypointScreenState.insideConfirm  = false;
-            WaypointScreenState.hasCustomColor = false;
-            WaypointScreenState.customColor    = 0xFFFFFFFF;
+        } else {
+            xcc_oldKeys = null;
         }
     }
 
-    /**
-     * Intercepts colour-dropdown selections:
-     * Click on "Custom Color" / "Custom: #hex" slot → open the colour picker.
-     * Click on any preset → let it proceed; custom state is preserved until OK.
-     */
+    @Inject(method = "lambda$init$3", at = @At("RETURN"))
+    private void xcc_applyCustomColor(ClientConfigManager config, ButtonWidget btn, CallbackInfo ci) {
+        try {
+            if (waypointsEdited == null || waypointsEdited.isEmpty()) return;
+
+            boolean customIsSelected = XaeroCustomColors.isCustomSlotSelected(
+                    (Screen)(Object) this);
+            boolean changed = false;
+
+            for (int i = 0; i < waypointsEdited.size(); i++) {
+                Waypoint wp = waypointsEdited.get(i);
+                String newKey = CustomColorManager.makeKey(
+                        wp.getName(), wp.getX(), wp.getY(), wp.getZ());
+
+                if (xcc_oldKeys != null && i < xcc_oldKeys.length) {
+                    String oldKey = xcc_oldKeys[i];
+                    if (oldKey != null && !oldKey.equals(newKey)) {
+                        changed |= CustomColorManager.INSTANCE.removeCustomColor(oldKey);
+                    }
+                }
+
+                if (customIsSelected && WaypointScreenState.hasCustomColor) {
+                    CustomColorManager.INSTANCE.setCustomColor(
+                            newKey, WaypointScreenState.customColor);
+                    changed = true;
+                } else if (!customIsSelected) {
+                    changed |= CustomColorManager.INSTANCE.removeCustomColor(newKey);
+                }
+            }
+
+            if (changed) CustomColorManager.INSTANCE.save();
+        } finally {
+            WaypointScreenState.hasCustomColor = false;
+            WaypointScreenState.customColor    = 0xFFFFFFFF;
+            xcc_oldKeys = null;
+        }
+    }
+
     @Inject(
         method = "onSelected(Lxaero/lib/client/gui/widget/dropdown/DropDownWidget;I)Z",
         at = @At("HEAD"),
@@ -90,7 +95,6 @@ public class GuiAddWaypointMixin {
         if (dd != colorDD) return;
 
         if (index == WaypointScreenState.customSlotIndex) {
-            // Open the colour picker.
             int initial = WaypointScreenState.hasCustomColor
                     ? WaypointScreenState.customColor : 0xFFFFFFFF;
             Screen self = (Screen)(Object) this;
@@ -102,11 +106,6 @@ public class GuiAddWaypointMixin {
                     }));
             cir.setReturnValue(false);
             cir.cancel();
-            return;
         }
-
-        // A preset was clicked.  Don't clear the custom colour yet — only
-        // clear it when the user actually clicks OK.  This lets them click
-        // back on "Custom: #hex" to reopen the picker with their colour.
     }
 }
