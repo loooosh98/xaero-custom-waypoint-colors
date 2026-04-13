@@ -11,8 +11,7 @@ import xaero.common.minimap.waypoints.Waypoint;
 
 import java.util.ArrayList;
 
-// Cleans up custom color entries when waypoints are deleted.
-// lambda$init$5 is the delete button handler; verify on every Xaero update.
+// lambda$init$5 = disable/enable button; verify on every Xaero update.
 @Mixin(value = GuiWaypoints.class, remap = false)
 public class GuiWaypointsMixin {
 
@@ -24,6 +23,10 @@ public class GuiWaypointsMixin {
             @SuppressWarnings("unchecked")
             ArrayList<Waypoint> selected = (ArrayList<Waypoint>) m.invoke(this);
             if (selected == null || selected.isEmpty()) return;
+
+            for (Waypoint wp : selected) {
+                if (!wp.isTemporary()) return;
+            }
 
             boolean changed = false;
             for (Waypoint wp : selected) {
