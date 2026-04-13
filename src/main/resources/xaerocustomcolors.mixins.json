@@ -7,7 +7,8 @@
     "GuiAddWaypointMixin",
     "GuiWaypointsMixin",
     "MinimapWaypointMixin",
-    "WaypointColorMixin"
+    "WaypointColorMixin",
+    "WaypointSharingHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

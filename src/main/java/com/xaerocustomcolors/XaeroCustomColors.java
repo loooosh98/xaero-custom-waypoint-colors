@@ -39,6 +39,8 @@ public class XaeroCustomColors implements ClientModInitializer {
         if (WaypointScreenState.justPickedColor) {
             WaypointScreenState.justPickedColor = false;
         } else {
+            Integer pending = WaypointScreenState.pendingReceivedColor;
+            WaypointScreenState.pendingReceivedColor = null;
             WaypointScreenState.reset();
             try {
                 if (waypointsEditedField == null) {
@@ -59,6 +61,10 @@ public class XaeroCustomColors implements ClientModInitializer {
                 }
             } catch (Exception e) {
                 System.err.println("[XaeroCustomColors] Failed to read waypoint data: " + e.getMessage());
+            }
+            if (pending != null) {
+                WaypointScreenState.customColor    = 0xFF000000 | (pending & 0xFFFFFF);
+                WaypointScreenState.hasCustomColor = true;
             }
         }
 
