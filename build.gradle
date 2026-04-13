@@ -23,11 +23,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    // Xaero's mods as compile-only references for mixin targets
     compileOnly files('../xaerominimap-fabric-1.21.11-25.3.10.jar')
     compileOnly files('../xaeroworldmap-fabric-1.21.11-1.40.11.jar')
-    // xaerolib is a nested JAR inside the minimap mod; extract it so the
-    // compiler can resolve the class hierarchy (ScreenBase → Screen etc.)
     compileOnly files('../xaerolib-fabric-1.21.11-1.1.0.jar')
 }
 
