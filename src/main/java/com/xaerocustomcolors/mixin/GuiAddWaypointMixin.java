@@ -30,8 +30,8 @@ public class GuiAddWaypointMixin {
     // Pre-save keys (name:x:y:z) for detecting renames / coord changes.
     @Unique private String[] xcc_oldKeys;
 
-    // OK button handler — where Xaero creates new / mutates existing waypoints.
-    // lambda$init$3 is compiler-generated; verify name on every Xaero update.
+    // OK button handler, this is where Xaero makes new waypoints or updates existing ones
+    // lambda$init$3 is auto generated so double check the name on every Xaero update
     @Inject(method = "lambda$init$3", at = @At("HEAD"))
     private void xcc_enterSave(ClientConfigManager config, ButtonWidget btn, CallbackInfo ci) {
         if (waypointsEdited != null) {

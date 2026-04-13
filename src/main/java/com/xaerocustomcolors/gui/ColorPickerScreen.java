@@ -20,7 +20,7 @@ public class ColorPickerScreen extends Screen {
     private final Screen parent;
     private final Consumer<Integer> callback;
 
-    // HSV state (0-1)
+    // HSV values, 0 to 1
     private float hue = 0f;
     private float sat = 1f;
     private float val = 1f;

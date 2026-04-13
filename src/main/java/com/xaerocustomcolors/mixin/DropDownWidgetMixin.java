@@ -11,8 +11,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
 
-// Handles re-clicking the already-selected custom slot (selectId skips onSelected
-// when id == selected, so GuiAddWaypointMixin's inject wouldn't fire).
 @Mixin(value = DropDownWidget.class, remap = false)
 public class DropDownWidgetMixin {
 

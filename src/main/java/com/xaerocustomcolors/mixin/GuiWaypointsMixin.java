@@ -11,7 +11,7 @@ import xaero.common.minimap.waypoints.Waypoint;
 
 import java.util.ArrayList;
 
-// lambda$init$5 = disable/enable button; verify on every Xaero update.
+// lambda$init$5 = disable/enable button (verify on every update)
 @Mixin(value = GuiWaypoints.class, remap = false)
 public class GuiWaypointsMixin {
 
