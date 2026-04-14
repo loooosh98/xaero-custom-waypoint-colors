@@ -1,14 +1,29 @@
-![Custom Color Selection](https://cdn.modrinth.com/data/cached_images/e6b60f67e17106bb18c5ed794cf6e0a4db9e813a.png)
+# Xaero Custom Waypoint Colors
+Xaero Custom Waypoint Colors is a mod for Minecraft and an addon to xaero96's minimap mod, allowing you to have more customizability in your waypoints.
 
-_This mod adds a custom color picker to Xaero's Minimap and World Map's waypoints because i didn't like only having 16 color presets for my waypoints._
+It adds the option for a RGB color picker within Xaero's Minimaps waypoint creation & editing system, no longer limiting waypoints to the default 16 preset colors! <brk>
+
+**\+ Support for Xaero's World Map**
 ***
-**In the waypoint creation menu/editor, you can now choose a custom RGB color for your waypoints.**
+## How to use
+When creating a waypoint in Xaero's Minimap, choosing to change the waypoints color will show 16 preset colors, with a new **Custom** option. Clicking the Custom option will prompt a RGB color picker, allowing you to choose any color for the waypoint.
 
-When you choose to use a custom color, a color picker menu appears, allowing you to choose the exact color you need. If you already have a specific color in mind, you can also copy and paste its hex code.
-
-If you want to change your custom color, simply click on the 'Custom:#HexCode' text again.
-
+If you already have a color in mind and its hex code, the color picker allows you to paste it in. <br>
 <br>
 
-**If you experience any bugs or want to request a feature please report them on [GitHub](https://github.com/loooosh98/xaero-custom-waypoint-colors/issues)**
-### ⚠️**This mod is not affiliated with nor endorsed by xaero96**
+***If you wish to change your custom color after you have selected one, clicking the new option of `Custom:HexCode` will return you back to the color picker.***
+
+## Downloads
+The latest & most up-to-date version of the mod can be downloaded on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/xaero-custom-waypoint-colors) or via [Releases](https://www.curseforge.com/minecraft/mc-mods/xaero-custom-waypoint-colors).
+
+## Installation
+To install the mod you need the following:
+- [Fabric Loader](https://fabricmc.net/use/installer/)
+- [Fabric API](https://modrinth.com/mod/fabric-api)
+- [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap)
+- [Xaero's Worldmap](https://modrinth.com/mod/xaeros-world-map) (Optional)
+
+## Help
+If you experience any bugs or want to request a feature you can do so via [Issue Tracker](https://github.com/loooosh98/xaero-custom-waypoint-colors/issues) or CurseForge comments
+
+# ⚠️**This mod is not affiliated with nor endorsed by xaero96**
