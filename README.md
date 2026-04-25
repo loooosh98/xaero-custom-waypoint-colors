@@ -16,7 +16,7 @@ Upon selecting a custom color for a waypoint, you will see in the preset dropdow
 
 Sharing a waypoint with a custom color can be done by using Xaero's built-in **Share** feature. Those who have the mod installed can click the add button for the waypoint in chat and the custom color will be imported.
 ## Downloads
-The latest version of the mod can be downloaded on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/xaero-custom-waypoint-colors) or via [Releases](https://github.com/loooosh98/xaero-custom-waypoint-colors/releases).
+The latest version of the mod can be downloaded on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/xaero-custom-waypoint-colors) and [Modrinth](https://modrinth.com/mod/xaero-custom-waypoint-colors) or via [Releases](https://github.com/loooosh98/xaero-custom-waypoint-colors/releases).
 
 ## Installation
 To install the mod, you need the following:
