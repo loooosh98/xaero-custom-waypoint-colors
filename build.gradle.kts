@@ -9,6 +9,8 @@ val minecraft_version: String by project
 val yarn_mappings: String by project
 val loader_version: String by project
 val fabric_version: String by project
+val minimap_version: String by project
+val worldmap_version: String by project
 
 version = mod_version
 group = maven_group
@@ -23,7 +25,10 @@ loom {
 
 repositories {
     maven("https://maven.fabricmc.net/")
+    maven("https://api.modrinth.com/maven")
 }
+
+val xaerolibSource: Configuration by configurations.creating
 
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft_version")
@@ -31,9 +36,24 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 
-    compileOnly(files("../xaerominimap-fabric-1.21.11-25.3.10.jar"))
-    compileOnly(files("../xaeroworldmap-fabric-1.21.11-1.40.11.jar"))
-    compileOnly(files("../xaerolib-fabric-1.21.11-1.1.0.jar"))
+    modCompileOnly("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
+    modCompileOnly("maven.modrinth:xaeros-world-map:fabric-$minecraft_version-$worldmap_version")
+
+    xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
+}
+
+val unpackXaerolib by tasks.registering(Sync::class) {
+    from(provider { xaerolibSource.map { zipTree(it).matching { include("META-INF/jars/xaerolib-*.jar") } } })
+    eachFile { relativePath = RelativePath(true, name) }
+    includeEmptyDirs = false
+    into(layout.buildDirectory.dir("xaerolib"))
+}
+
+dependencies {
+    compileOnly(fileTree(layout.buildDirectory.dir("xaerolib")) {
+        include("*.jar")
+        builtBy(unpackXaerolib)
+    })
 }
 
 tasks.processResources {
