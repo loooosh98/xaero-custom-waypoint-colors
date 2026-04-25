@@ -13,8 +13,8 @@ public class WaypointColorMixin {
     @Inject(method = "getHex", at = @At("HEAD"), cancellable = true)
     private void xcc_overrideHex(CallbackInfoReturnable<Integer> cir) {
         Integer custom = ColorInterceptState.pendingCustomHex.get();
+        ColorInterceptState.pendingCustomHex.remove();
         if (custom != null) {
-            ColorInterceptState.pendingCustomHex.remove();
             cir.setReturnValue(custom);
         }
     }

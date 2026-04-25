@@ -217,11 +217,17 @@ public class ColorPickerScreen extends Screen {
     private void onRgbInput() {
         if (updatingFields) return;
         try {
-            int r = clamp255(Integer.parseInt(rField.getText().trim()));
-            int g = clamp255(Integer.parseInt(gField.getText().trim()));
-            int b = clamp255(Integer.parseInt(bField.getText().trim()));
+            int rRaw = Integer.parseInt(rField.getText().trim());
+            int gRaw = Integer.parseInt(gField.getText().trim());
+            int bRaw = Integer.parseInt(bField.getText().trim());
+            int r = clamp255(rRaw);
+            int g = clamp255(gRaw);
+            int b = clamp255(bRaw);
             fromArgb(0xFF000000 | (r << 16) | (g << 8) | b);
             updatingFields = true;
+            if (r != rRaw) rField.setText(String.valueOf(r));
+            if (g != gRaw) gField.setText(String.valueOf(g));
+            if (b != bRaw) bField.setText(String.valueOf(b));
             hexField.setText(String.format("#%02X%02X%02X", r, g, b));
             updatingFields = false;
         } catch (NumberFormatException ignored) {}

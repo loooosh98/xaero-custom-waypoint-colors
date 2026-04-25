@@ -1,10 +1,13 @@
 package com.xaerocustomcolors;
 
 import com.xaerocustomcolors.color.CustomColorManager;
+import com.xaerocustomcolors.color.XaeroContext;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screen.Screen;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xaero.common.minimap.waypoints.Waypoint;
 
 import java.lang.reflect.Field;
@@ -14,7 +17,8 @@ import java.util.Arrays;
 public class XaeroCustomColors implements ClientModInitializer {
 
     public static final String MOD_ID = "xaerocustomcolors";
-    public static final String CUSTOM_COLOR_LABEL = "\u00a77Custom..";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final String CUSTOM_COLOR_LABEL = "\u00a77Custom";
 
     private static final String GUI_ADD_WAYPOINT = "xaero.common.gui.GuiAddWaypoint";
 
@@ -26,8 +30,6 @@ public class XaeroCustomColors implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        CustomColorManager.INSTANCE.load();
-
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen.getClass().getName().equals(GUI_ADD_WAYPOINT)) {
                 handleWaypointEditScreen(screen);
@@ -41,7 +43,8 @@ public class XaeroCustomColors implements ClientModInitializer {
         } else {
             Integer pending = WaypointScreenState.pendingReceivedColor;
             WaypointScreenState.pendingReceivedColor = null;
-            WaypointScreenState.reset();
+            WaypointScreenState.hasCustomColor = false;
+            WaypointScreenState.customColor    = 0xFFFFFFFF;
             try {
                 if (waypointsEditedField == null) {
                     waypointsEditedField = screen.getClass().getDeclaredField("waypointsEdited");
@@ -51,16 +54,17 @@ public class XaeroCustomColors implements ClientModInitializer {
                 ArrayList<Waypoint> wps = (ArrayList<Waypoint>) waypointsEditedField.get(screen);
                 if (wps != null && !wps.isEmpty()) {
                     Waypoint wp = wps.get(0);
-                    String key = CustomColorManager.makeKey(
-                            wp.getName(), wp.getX(), wp.getY(), wp.getZ());
-                    Integer saved = CustomColorManager.INSTANCE.getCustomColor(key);
-                    if (saved != null) {
-                        WaypointScreenState.customColor    = saved;
-                        WaypointScreenState.hasCustomColor = true;
+                    String ctx = XaeroContext.forWaypoint(wp);
+                    if (ctx != null) {
+                        Integer saved = CustomColorManager.INSTANCE.getCustomColor(ctx, wp);
+                        if (saved != null) {
+                            WaypointScreenState.customColor    = saved;
+                            WaypointScreenState.hasCustomColor = true;
+                        }
                     }
                 }
             } catch (Exception e) {
-                System.err.println("[XaeroCustomColors] Failed to read waypoint data: " + e.getMessage());
+                LOGGER.error("Failed to read waypoint data", e);
             }
             if (pending != null) {
                 WaypointScreenState.customColor    = 0xFF000000 | (pending & 0xFFFFFF);
@@ -104,7 +108,7 @@ public class XaeroCustomColors implements ClientModInitializer {
                 selectedField.setInt(colorDD, customRealIndex);
             }
         } catch (Exception e) {
-            System.err.println("[XaeroCustomColors] Failed to append custom dropdown entry: " + e.getMessage());
+            LOGGER.error("Failed to append custom dropdown entry", e);
         }
     }
 
@@ -117,20 +121,6 @@ public class XaeroCustomColors implements ClientModInitializer {
             return sel == WaypointScreenState.customSlotIndex;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    public static void updateCustomEntryText(Screen screen, String text) {
-        try {
-            Object colorDD = getColorDD(screen);
-            if (colorDD == null) return;
-            ensureDropdownFields(colorDD);
-            String[] realOptions = (String[]) realOptionsField.get(colorDD);
-            String[] options = (String[]) optionsField.get(colorDD);
-            if (realOptions.length > 0) realOptions[realOptions.length - 1] = text;
-            if (options.length > 0) options[options.length - 1] = text;
-        } catch (Exception e) {
-            System.err.println("[XaeroCustomColors] Failed to update custom entry text: " + e.getMessage());
         }
     }
 

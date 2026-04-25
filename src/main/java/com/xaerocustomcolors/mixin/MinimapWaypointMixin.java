@@ -1,6 +1,7 @@
 package com.xaerocustomcolors.mixin;
 
 import com.xaerocustomcolors.color.CustomColorManager;
+import com.xaerocustomcolors.color.XaeroContext;
 import com.xaerocustomcolors.state.ColorInterceptState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -13,7 +14,6 @@ import xaero.hud.minimap.waypoint.WaypointColor;
 @Mixin(value = Waypoint.class, remap = false)
 public class MinimapWaypointMixin {
 
-    @Unique private transient String  xcc_cachedKey;
     @Unique private transient Integer xcc_cachedColor;
     @Unique private transient long    xcc_cacheVersion = -1;
 
@@ -22,9 +22,8 @@ public class MinimapWaypointMixin {
         long currentVersion = CustomColorManager.INSTANCE.getVersion();
         if (xcc_cacheVersion != currentVersion) {
             Waypoint self = (Waypoint)(Object) this;
-            xcc_cachedKey = CustomColorManager.makeKey(
-                    self.getName(), self.getX(), self.getY(), self.getZ());
-            xcc_cachedColor = CustomColorManager.INSTANCE.getCustomColor(xcc_cachedKey);
+            String ctx = XaeroContext.forWaypoint(self);
+            xcc_cachedColor = ctx == null ? null : CustomColorManager.INSTANCE.getCustomColor(ctx, self);
             xcc_cacheVersion = currentVersion;
         }
         if (xcc_cachedColor != null) {

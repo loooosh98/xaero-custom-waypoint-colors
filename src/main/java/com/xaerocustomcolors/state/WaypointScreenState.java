@@ -6,11 +6,4 @@ public class WaypointScreenState {
     public static boolean justPickedColor = false;
     public static int customSlotIndex = -1;
     public static Integer pendingReceivedColor = null;
-
-    public static void reset() {
-        customColor     = 0xFFFFFFFF;
-        hasCustomColor  = false;
-        justPickedColor = false;
-        customSlotIndex = -1;
-    }
 }

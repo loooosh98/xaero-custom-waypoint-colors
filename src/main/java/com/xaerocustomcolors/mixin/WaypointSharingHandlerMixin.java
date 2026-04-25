@@ -1,6 +1,7 @@
 package com.xaerocustomcolors.mixin;
 
 import com.xaerocustomcolors.color.CustomColorManager;
+import com.xaerocustomcolors.color.XaeroContext;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,10 +22,8 @@ public class WaypointSharingHandlerMixin {
         if (shareStr == null || sharedWaypoint == null) return shareStr;
         if (!shareStr.startsWith("xaero-waypoint:") && !shareStr.startsWith("xaero_waypoint:")) return shareStr;
 
-        String key = CustomColorManager.makeKey(
-                sharedWaypoint.getName(), sharedWaypoint.getX(),
-                sharedWaypoint.getY(), sharedWaypoint.getZ());
-        Integer color = CustomColorManager.INSTANCE.getCustomColor(key);
+        String ctx = XaeroContext.forCurrentMinimap();
+        Integer color = CustomColorManager.INSTANCE.getCustomColor(ctx, sharedWaypoint);
         if (color == null) return shareStr;
         return shareStr + String.format(":xcc=%06X", color & 0xFFFFFF);
     }
