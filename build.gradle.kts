@@ -1,12 +1,11 @@
 plugins {
-    id("fabric-loom") version "1.16.1"
+    id("net.fabricmc.fabric-loom") version "1.16.1"
 }
 
 val mod_version: String by project
 val maven_group: String by project
 val archives_base_name: String by project
 val minecraft_version: String by project
-val yarn_mappings: String by project
 val loader_version: String by project
 val fabric_version: String by project
 val minimap_version: String by project
@@ -32,12 +31,11 @@ val xaerolibSource: Configuration by configurations.creating
 
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft_version")
-    mappings("net.fabricmc:yarn:$yarn_mappings:v2")
-    modImplementation("net.fabricmc:fabric-loader:$loader_version")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
+    implementation("net.fabricmc:fabric-loader:$loader_version")
+    implementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 
-    modCompileOnly("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
-    modCompileOnly("maven.modrinth:xaeros-world-map:fabric-$minecraft_version-$worldmap_version")
+    compileOnly("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
+    compileOnly("maven.modrinth:xaeros-world-map:fabric-$minecraft_version-$worldmap_version")
 
     xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
 }
@@ -65,13 +63,13 @@ tasks.processResources {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(21)
+    options.release.set(25)
 }
 
 java {
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks.jar {

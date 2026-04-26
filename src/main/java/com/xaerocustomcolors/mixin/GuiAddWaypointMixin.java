@@ -5,9 +5,9 @@ import com.xaerocustomcolors.color.CustomColorManager;
 import com.xaerocustomcolors.color.XaeroContext;
 import com.xaerocustomcolors.gui.ColorPickerScreen;
 import com.xaerocustomcolors.state.WaypointScreenState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,9 +32,9 @@ public class GuiAddWaypointMixin {
     @Unique private String[] xcc_oldKeys;
 
     // OK button handler, this is where Xaero makes new waypoints or updates existing ones
-    // lambda$init$3 is auto generated so double check the name on every Xaero update
-    @Inject(method = "lambda$init$3", at = @At("HEAD"))
-    private void xcc_enterSave(ClientConfigManager config, ButtonWidget btn, CallbackInfo ci) {
+    // lambda$init$0 is auto generated so double check the name on every Xaero update
+    @Inject(method = "lambda$init$0", at = @At("HEAD"))
+    private void xcc_enterSave(ClientConfigManager config, Button btn, CallbackInfo ci) {
         if (waypointsEdited != null) {
             xcc_oldKeys = new String[waypointsEdited.size()];
             for (int i = 0; i < waypointsEdited.size(); i++) {
@@ -45,8 +45,8 @@ public class GuiAddWaypointMixin {
         }
     }
 
-    @Inject(method = "lambda$init$3", at = @At("RETURN"))
-    private void xcc_applyCustomColor(ClientConfigManager config, ButtonWidget btn, CallbackInfo ci) {
+    @Inject(method = "lambda$init$0", at = @At("RETURN"))
+    private void xcc_applyCustomColor(ClientConfigManager config, Button btn, CallbackInfo ci) {
         try {
             if (waypointsEdited == null || waypointsEdited.isEmpty()) return;
 
@@ -94,7 +94,7 @@ public class GuiAddWaypointMixin {
             int initial = WaypointScreenState.hasCustomColor
                     ? WaypointScreenState.customColor : 0xFFFFFFFF;
             Screen self = (Screen)(Object) this;
-            MinecraftClient.getInstance().setScreen(
+            Minecraft.getInstance().setScreen(
                     new ColorPickerScreen(self, initial, chosen -> {
                         WaypointScreenState.customColor    = chosen;
                         WaypointScreenState.hasCustomColor = true;

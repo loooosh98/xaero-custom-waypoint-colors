@@ -3,7 +3,7 @@ package com.xaerocustomcolors.mixin;
 import com.xaerocustomcolors.XaeroCustomColors;
 import com.xaerocustomcolors.color.CustomColorManager;
 import com.xaerocustomcolors.color.XaeroContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.components.Button;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,7 +21,7 @@ public class GuiWaypointsMixin {
     private static Method xcc_getSelectedWaypointsList;
 
     @Inject(method = "lambda$init$5", at = @At("HEAD"))
-    private void xcc_removeDeletedColors(ButtonWidget btn, CallbackInfo ci) {
+    private void xcc_removeDeletedColors(Button btn, CallbackInfo ci) {
         try {
             if (xcc_getSelectedWaypointsList == null) {
                 xcc_getSelectedWaypointsList = GuiWaypoints.class.getDeclaredMethod("getSelectedWaypointsList");

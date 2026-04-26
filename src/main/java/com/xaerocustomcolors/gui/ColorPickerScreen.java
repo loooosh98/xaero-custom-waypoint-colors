@@ -1,11 +1,11 @@
 package com.xaerocustomcolors.gui;
 
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
@@ -30,15 +30,15 @@ public class ColorPickerScreen extends Screen {
     private int svX, svY;
     private int hueX, hueY, hueBarW;
 
-    private TextFieldWidget hexField;
-    private TextFieldWidget rField, gField, bField;
+    private EditBox hexField;
+    private EditBox rField, gField, bField;
 
     private boolean draggingSV  = false;
     private boolean draggingHue = false;
     private boolean updatingFields = false;
 
     public ColorPickerScreen(Screen parent, int initialArgb, Consumer<Integer> callback) {
-        super(Text.literal("Custom Waypoint Color"));
+        super(Component.literal("Custom Waypoint Color"));
         this.parent   = parent;
         this.callback = callback;
         fromArgb(initialArgb);
@@ -56,37 +56,37 @@ public class ColorPickerScreen extends Screen {
 
         int fieldsY = hueY + HUE_BAR_H + 12;
 
-        hexField = new TextFieldWidget(textRenderer, panelX + PADDING, fieldsY, 115, 16,
-                Text.literal("Hex"));
+        hexField = new EditBox(font, panelX + PADDING, fieldsY, 115, 16,
+                Component.literal("Hex"));
         hexField.setMaxLength(7);
-        hexField.setChangedListener(this::onHexInput);
-        addDrawableChild(hexField);
+        hexField.setResponder(this::onHexInput);
+        addRenderableWidget(hexField);
 
         int compW = 40;
         int compY = fieldsY + 24;
-        rField = new TextFieldWidget(textRenderer, panelX + PADDING,          compY, compW, 16, Text.literal("R"));
-        gField = new TextFieldWidget(textRenderer, panelX + PADDING + 44,     compY, compW, 16, Text.literal("G"));
-        bField = new TextFieldWidget(textRenderer, panelX + PADDING + 88,     compY, compW, 16, Text.literal("B"));
-        for (TextFieldWidget f : new TextFieldWidget[]{ rField, gField, bField }) {
+        rField = new EditBox(font, panelX + PADDING,          compY, compW, 16, Component.literal("R"));
+        gField = new EditBox(font, panelX + PADDING + 44,     compY, compW, 16, Component.literal("G"));
+        bField = new EditBox(font, panelX + PADDING + 88,     compY, compW, 16, Component.literal("B"));
+        for (EditBox f : new EditBox[]{ rField, gField, bField }) {
             f.setMaxLength(3);
-            f.setChangedListener(s -> onRgbInput());
-            addDrawableChild(f);
+            f.setResponder(s -> onRgbInput());
+            addRenderableWidget(f);
         }
 
         int btnY = panelY + PANEL_H - 28;
         int btnW = (PANEL_W - PADDING * 3) / 2;
-        addDrawableChild(ButtonWidget.builder(Text.literal("OK"), b -> {
+        addRenderableWidget(Button.builder(Component.literal("OK"), b -> {
             callback.accept(getCurrentArgb());
-            close();
-        }).dimensions(panelX + PADDING, btnY, btnW, 20).build());
-        addDrawableChild(ButtonWidget.builder(Text.literal("Cancel"), b -> close())
-                .dimensions(panelX + PADDING * 2 + btnW, btnY, btnW, 20).build());
+            onClose();
+        }).bounds(panelX + PADDING, btnY, btnW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
+                .bounds(panelX + PADDING * 2 + btnW, btnY, btnW, 20).build());
 
         refreshFields();
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         // Panel background + border
         ctx.fill(panelX,     panelY,     panelX + PANEL_W,     panelY + PANEL_H,     0xDD1A1A1A);
         ctx.fill(panelX,     panelY,     panelX + PANEL_W,     panelY + 1,           0xFFAAAAAA);
@@ -94,7 +94,9 @@ public class ColorPickerScreen extends Screen {
         ctx.fill(panelX,     panelY,     panelX + 1,           panelY + PANEL_H,     0xFFAAAAAA);
         ctx.fill(panelX + PANEL_W - 1, panelY, panelX + PANEL_W, panelY + PANEL_H,  0xFFAAAAAA);
 
-        ctx.drawCenteredTextWithShadow(textRenderer, title, panelX + PANEL_W / 2, panelY + 8, 0xFFFFFF);
+        String titleStr = title.getString();
+        int titleW = font.width(titleStr);
+        ctx.text(font, titleStr, panelX + PANEL_W / 2 - titleW / 2, panelY + 8, 0xFFFFFF);
 
         drawSVSquare(ctx);
 
@@ -116,18 +118,18 @@ public class ColorPickerScreen extends Screen {
         ctx.fill(swatchX, swatchY, swatchX + 32, swatchY + 36, getCurrentArgb());
 
         int fieldsY = hueY + HUE_BAR_H + 12;
-        ctx.drawTextWithShadow(textRenderer, Text.literal("Hex:"), panelX + PADDING, fieldsY - 9, 0xCCCCCC);
+        ctx.text(font, "Hex:", panelX + PADDING, fieldsY - 9, 0xCCCCCC);
         int compY = fieldsY + 24;
-        ctx.drawTextWithShadow(textRenderer, Text.literal("R"), panelX + PADDING + 15, compY - 9, 0xFF8888);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("G"), panelX + PADDING + 59, compY - 9, 0x88FF88);
-        ctx.drawTextWithShadow(textRenderer, Text.literal("B"), panelX + PADDING + 103, compY - 9, 0x8888FF);
+        ctx.text(font, "R", panelX + PADDING + 15, compY - 9, 0xFF8888);
+        ctx.text(font, "G", panelX + PADDING + 59, compY - 9, 0x88FF88);
+        ctx.text(font, "B", panelX + PADDING + 103, compY - 9, 0x8888FF);
 
-        super.render(ctx, mouseX, mouseY, delta);
+        super.extractRenderState(ctx, mouseX, mouseY, delta);
     }
 
     private static final int STRIP_W = 3;
 
-    private void drawSVSquare(DrawContext ctx) {
+    private void drawSVSquare(GuiGraphicsExtractor ctx) {
         for (int col = 0; col < PICKER_SIZE; col += STRIP_W) {
             float s = (float) col / (PICKER_SIZE - 1);
             int topColor = hsvToArgb(hue, s, 1f);
@@ -136,7 +138,7 @@ public class ColorPickerScreen extends Screen {
         }
     }
 
-    private void drawHueBar(DrawContext ctx) {
+    private void drawHueBar(GuiGraphicsExtractor ctx) {
         for (int col = 0; col < hueBarW; col += STRIP_W) {
             float h = (float) col / (hueBarW - 1);
             int right = Math.min(hueX + col + STRIP_W, hueX + hueBarW);
@@ -145,7 +147,7 @@ public class ColorPickerScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean shifted) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean shifted) {
         double mx = click.x(), my = click.y();
         if (click.button() == 0) {
             if (inSV(mx, my)) {
@@ -163,21 +165,21 @@ public class ColorPickerScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double dx, double dy) {
+    public boolean mouseDragged(MouseButtonEvent click, double dx, double dy) {
         if (draggingSV)  { applySV(click.x(), click.y());  return true; }
         if (draggingHue) { applyHue(click.x());             return true; }
         return super.mouseDragged(click, dx, dy);
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         draggingSV  = false;
         draggingHue = false;
         return super.mouseReleased(click);
     }
 
     @Override
-    public boolean shouldPause() { return true; }
+    public boolean isPauseScreen() { return true; }
 
     private boolean inSV(double mx, double my) {
         return mx >= svX && mx < svX + PICKER_SIZE && my >= svY && my < svY + PICKER_SIZE;
@@ -206,9 +208,9 @@ public class ColorPickerScreen extends Screen {
                 fromArgb(0xFF000000 | Integer.parseInt(t, 16));
                 updatingFields = true;
                 int rgb = getCurrentArgb();
-                rField.setText(String.valueOf((rgb >> 16) & 0xFF));
-                gField.setText(String.valueOf((rgb >>  8) & 0xFF));
-                bField.setText(String.valueOf( rgb        & 0xFF));
+                rField.setValue(String.valueOf((rgb >> 16) & 0xFF));
+                gField.setValue(String.valueOf((rgb >>  8) & 0xFF));
+                bField.setValue(String.valueOf( rgb        & 0xFF));
                 updatingFields = false;
             } catch (NumberFormatException ignored) {}
         }
@@ -217,18 +219,18 @@ public class ColorPickerScreen extends Screen {
     private void onRgbInput() {
         if (updatingFields) return;
         try {
-            int rRaw = Integer.parseInt(rField.getText().trim());
-            int gRaw = Integer.parseInt(gField.getText().trim());
-            int bRaw = Integer.parseInt(bField.getText().trim());
+            int rRaw = Integer.parseInt(rField.getValue().trim());
+            int gRaw = Integer.parseInt(gField.getValue().trim());
+            int bRaw = Integer.parseInt(bField.getValue().trim());
             int r = clamp255(rRaw);
             int g = clamp255(gRaw);
             int b = clamp255(bRaw);
             fromArgb(0xFF000000 | (r << 16) | (g << 8) | b);
             updatingFields = true;
-            if (r != rRaw) rField.setText(String.valueOf(r));
-            if (g != gRaw) gField.setText(String.valueOf(g));
-            if (b != bRaw) bField.setText(String.valueOf(b));
-            hexField.setText(String.format("#%02X%02X%02X", r, g, b));
+            if (r != rRaw) rField.setValue(String.valueOf(r));
+            if (g != gRaw) gField.setValue(String.valueOf(g));
+            if (b != bRaw) bField.setValue(String.valueOf(b));
+            hexField.setValue(String.format("#%02X%02X%02X", r, g, b));
             updatingFields = false;
         } catch (NumberFormatException ignored) {}
     }
@@ -238,10 +240,10 @@ public class ColorPickerScreen extends Screen {
         int argb = getCurrentArgb();
         int r = (argb >> 16) & 0xFF, g = (argb >> 8) & 0xFF, b = argb & 0xFF;
         updatingFields = true;
-        hexField.setText(String.format("#%02X%02X%02X", r, g, b));
-        rField.setText(String.valueOf(r));
-        gField.setText(String.valueOf(g));
-        bField.setText(String.valueOf(b));
+        hexField.setValue(String.format("#%02X%02X%02X", r, g, b));
+        rField.setValue(String.valueOf(r));
+        gField.setValue(String.valueOf(g));
+        bField.setValue(String.valueOf(b));
         updatingFields = false;
     }
 
@@ -291,7 +293,7 @@ public class ColorPickerScreen extends Screen {
     private static int   clamp255(int v)  { return Math.max(0, Math.min(255, v)); }
 
     @Override
-    public void close() {
-        client.setScreen(parent);
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 }

@@ -5,7 +5,7 @@ import com.xaerocustomcolors.color.XaeroContext;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xaero.common.minimap.waypoints.Waypoint;

@@ -2,8 +2,8 @@ package com.xaerocustomcolors.mixin;
 
 import com.xaerocustomcolors.gui.ColorPickerScreen;
 import com.xaerocustomcolors.state.WaypointScreenState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,8 +22,8 @@ public class DropDownWidgetMixin {
         if (id != WaypointScreenState.customSlotIndex) return;
         if (id != selected) return;
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        Screen screen = client.currentScreen;
+        Minecraft client = Minecraft.getInstance();
+        Screen screen = client.screen;
         if (screen == null) return;
         if (!screen.getClass().getName().equals("xaero.common.gui.GuiAddWaypoint")) return;
 
