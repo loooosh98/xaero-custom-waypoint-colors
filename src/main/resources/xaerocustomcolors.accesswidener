@@ -1,6 +1,6 @@
 accessWidener v2 official
 
-# Make Screen.addDrawableChild public so we can call it from the
+# Make Screen.addRenderableWidget public so we can call it from the
 # ScreenEvents.AFTER_INIT handler without a mixin.
-# Erased descriptor: first bound of <T extends Element & Drawable & Selectable> is Element.
+# Erased descriptor: first bound of <T extends GuiEventListener & Renderable & NarratableEntry> is GuiEventListener.
 accessible method net/minecraft/client/gui/screens/Screen addRenderableWidget (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
