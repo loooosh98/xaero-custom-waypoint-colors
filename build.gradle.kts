@@ -56,9 +56,13 @@ dependencies {
 
 tasks.processResources {
     inputs.property("version", project.version)
+    inputs.property("minimap_version", minimap_version)
 
     filesMatching("fabric.mod.json") {
-        expand("version" to project.version)
+        expand(
+            "version" to project.version,
+            "minimap_version" to minimap_version
+        )
     }
 }
 
