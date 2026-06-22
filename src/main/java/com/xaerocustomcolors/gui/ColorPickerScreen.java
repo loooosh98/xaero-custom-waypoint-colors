@@ -94,10 +94,6 @@ public class ColorPickerScreen extends Screen {
         ctx.fill(panelX,     panelY,     panelX + 1,           panelY + PANEL_H,     0xFFAAAAAA);
         ctx.fill(panelX + PANEL_W - 1, panelY, panelX + PANEL_W, panelY + PANEL_H,  0xFFAAAAAA);
 
-        String titleStr = title.getString();
-        int titleW = font.width(titleStr);
-        ctx.text(font, titleStr, panelX + PANEL_W / 2 - titleW / 2, panelY + 8, 0xFFFFFF);
-
         drawSVSquare(ctx);
 
         int curX = svX + Math.round(sat * (PICKER_SIZE - 1));
@@ -116,13 +112,6 @@ public class ColorPickerScreen extends Screen {
         int swatchY = hueY + HUE_BAR_H + 12;
         ctx.fill(swatchX - 1, swatchY - 1, swatchX + 33, swatchY + 37, 0xFFAAAAAA);
         ctx.fill(swatchX, swatchY, swatchX + 32, swatchY + 36, getCurrentArgb());
-
-        int fieldsY = hueY + HUE_BAR_H + 12;
-        ctx.text(font, "Hex:", panelX + PADDING, fieldsY - 9, 0xCCCCCC);
-        int compY = fieldsY + 24;
-        ctx.text(font, "R", panelX + PADDING + 15, compY - 9, 0xFF8888);
-        ctx.text(font, "G", panelX + PADDING + 59, compY - 9, 0x88FF88);
-        ctx.text(font, "B", panelX + PADDING + 103, compY - 9, 0x8888FF);
 
         super.extractRenderState(ctx, mouseX, mouseY, delta);
     }
