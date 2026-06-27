@@ -23,13 +23,13 @@ public class DropDownWidgetMixin {
         if (id != selected) return;
 
         Minecraft client = Minecraft.getInstance();
-        Screen screen = client.screen;
+        Screen screen = client.gui.screen();
         if (screen == null) return;
         if (!screen.getClass().getName().equals("xaero.common.gui.GuiAddWaypoint")) return;
 
         int initial = WaypointScreenState.hasCustomColor
                 ? WaypointScreenState.customColor : 0xFFFFFFFF;
-        client.setScreen(new ColorPickerScreen(screen, initial, chosen -> {
+        client.gui.setScreen(new ColorPickerScreen(screen, initial, chosen -> {
             WaypointScreenState.customColor    = chosen;
             WaypointScreenState.hasCustomColor = true;
             WaypointScreenState.justPickedColor = true;

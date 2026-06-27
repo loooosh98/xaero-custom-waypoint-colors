@@ -94,7 +94,7 @@ public class GuiAddWaypointMixin {
             int initial = WaypointScreenState.hasCustomColor
                     ? WaypointScreenState.customColor : 0xFFFFFFFF;
             Screen self = (Screen)(Object) this;
-            Minecraft.getInstance().setScreen(
+            Minecraft.getInstance().gui.setScreen(
                     new ColorPickerScreen(self, initial, chosen -> {
                         WaypointScreenState.customColor    = chosen;
                         WaypointScreenState.hasCustomColor = true;
