@@ -25,11 +25,8 @@ public class CustomColorManager {
     private static final Type MAP_TYPE = new TypeToken<Map<String, Integer>>() {}.getType();
     private static final String ROOT_DIR = "xaero_custom_waypoint_colors";
     private static final String COLOR_FILE = "colors.json";
-    private static final String LEGACY_FILE = "xaero-custom-colors.json";
 
     private final ConcurrentMap<String, ConcurrentMap<String, Integer>> bucketsByCtx = new ConcurrentHashMap<>();
-    private final Map<String, Integer> legacyEntries = new ConcurrentHashMap<>();
-    private volatile boolean legacyLoaded = false;
     private final AtomicLong version = new AtomicLong();
 
     private CustomColorManager() {}
@@ -44,9 +41,7 @@ public class CustomColorManager {
         if (ctxPath == null || wp == null) return null;
         String key = wpKey(wp);
         Map<String, Integer> bucket = loadBucket(ctxPath);
-        Integer c = bucket.get(key);
-        if (c != null) return c;
-        return migrateFromLegacy(ctxPath, key);
+        return bucket.get(key);
     }
 
     public void setCustomColor(String ctxPath, Waypoint wp, int argbColor) {
@@ -77,43 +72,6 @@ public class CustomColorManager {
             saveBucket(ctxPath);
         }
         return had;
-    }
-
-    private Integer migrateFromLegacy(String ctxPath, String wpKey) {
-        loadLegacyOnce();
-        Integer c = legacyEntries.get(wpKey);
-        if (c == null) return null;
-        Map<String, Integer> bucket = loadBucket(ctxPath);
-        bucket.put(wpKey, c);
-        version.incrementAndGet();
-        saveBucket(ctxPath);
-        return c;
-    }
-
-    private synchronized void loadLegacyOnce() {
-        if (legacyLoaded) return;
-        legacyLoaded = true;
-        Path p = legacyFile();
-        if (!Files.exists(p)) return;
-        try (Reader r = Files.newBufferedReader(p)) {
-            Map<String, Integer> all = GSON.fromJson(r, MAP_TYPE);
-            if (all == null) return;
-            for (Map.Entry<String, Integer> e : all.entrySet()) {
-                String k = e.getKey();
-                Integer v = e.getValue();
-                if (k == null || v == null) continue;
-                String[] parts = k.split(":");
-                if (parts.length != 4) continue;
-                if (!isInt(parts[1]) || !isInt(parts[2]) || !isInt(parts[3])) continue;
-                legacyEntries.put(k, v);
-            }
-        } catch (Exception ex) {
-            com.xaerocustomcolors.XaeroCustomColors.LOGGER.error("Failed to load legacy colors", ex);
-        }
-    }
-
-    private static boolean isInt(String s) {
-        try { Integer.parseInt(s); return true; } catch (NumberFormatException e) { return false; }
     }
 
     private Map<String, Integer> loadBucket(String ctxPath) {
@@ -161,10 +119,6 @@ public class CustomColorManager {
             target = target.resolve(sanitize(seg));
         }
         return target.resolve(COLOR_FILE);
-    }
-
-    private Path legacyFile() {
-        return FabricLoader.getInstance().getConfigDir().resolve(LEGACY_FILE);
     }
 
     private static String sanitize(String s) {
