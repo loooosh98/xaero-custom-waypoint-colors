@@ -32,7 +32,9 @@ public class ColorPickerScreen extends Screen {
 
     private EditBox hexField;
     private EditBox rField, gField, bField;
+    private Button okButton;
 
+    private boolean hasColor = false;
     private boolean draggingSV  = false;
     private boolean draggingHue = false;
     private boolean updatingFields = false;
@@ -41,7 +43,8 @@ public class ColorPickerScreen extends Screen {
         super(Component.literal("Custom Waypoint Color"));
         this.parent   = parent;
         this.callback = callback;
-        fromArgb(initialArgb);
+        hasColor = initialArgb != 0;
+        if (hasColor) fromArgb(initialArgb);
     }
 
     @Override
@@ -60,6 +63,7 @@ public class ColorPickerScreen extends Screen {
                 Component.literal("Hex"));
         hexField.setMaxLength(7);
         hexField.setResponder(this::onHexInput);
+        hexField.setHint(Component.literal("#FFFFFF").withStyle(EditBox.DEFAULT_HINT_STYLE));
         addRenderableWidget(hexField);
 
         int compW = 40;
@@ -70,19 +74,21 @@ public class ColorPickerScreen extends Screen {
         for (EditBox f : new EditBox[]{ rField, gField, bField }) {
             f.setMaxLength(3);
             f.setResponder(s -> onRgbInput());
+            f.setHint(Component.literal("255").withStyle(EditBox.DEFAULT_HINT_STYLE));
             addRenderableWidget(f);
         }
 
         int btnY = panelY + PANEL_H - 28;
         int btnW = (PANEL_W - PADDING * 3) / 2;
-        addRenderableWidget(Button.builder(Component.literal("OK"), b -> {
+        okButton = addRenderableWidget(Button.builder(Component.literal("OK"), b -> {
             callback.accept(getCurrentArgb());
             onClose();
         }).bounds(panelX + PADDING, btnY, btnW, 20).build());
+        okButton.active = hasColor;
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
                 .bounds(panelX + PADDING * 2 + btnW, btnY, btnW, 20).build());
 
-        refreshFields();
+        if (hasColor) refreshFields();
     }
 
     @Override
@@ -96,43 +102,57 @@ public class ColorPickerScreen extends Screen {
 
         drawSVSquare(ctx);
 
-        int curX = svX + Math.round(sat * (PICKER_SIZE - 1));
-        int curY = svY + Math.round((1f - val) * (PICKER_SIZE - 1));
-        ctx.fill(curX - 3, curY - 3, curX + 4, curY + 4, 0xFFFFFFFF);
-        ctx.fill(curX - 2, curY - 2, curX + 3, curY + 3, 0xFF000000);
-        ctx.fill(curX - 1, curY - 1, curX + 2, curY + 2, 0xFFFFFFFF);
+        if (hasColor) {
+            int curX = svX + Math.round(sat * (PICKER_SIZE - 1));
+            int curY = svY + Math.round((1f - val) * (PICKER_SIZE - 1));
+            ctx.fill(curX - 3, curY - 3, curX + 4, curY + 4, 0xFFFFFFFF);
+            ctx.fill(curX - 2, curY - 2, curX + 3, curY + 3, 0xFF000000);
+            ctx.fill(curX - 1, curY - 1, curX + 2, curY + 2, getCurrentArgb());
+        }
 
         drawHueBar(ctx);
 
-        int hcX = hueX + Math.round(hue * (hueBarW - 1));
-        ctx.fill(hcX - 1, hueY - 2, hcX + 2, hueY + HUE_BAR_H + 2, 0xFFFFFFFF);
-        ctx.fill(hcX,     hueY - 1, hcX + 1, hueY + HUE_BAR_H + 1, 0xFF000000);
+        if (hasColor) {
+            int hcX = hueX + Math.round(hue * (hueBarW - 1));
+            ctx.fill(hcX - 1, hueY - 2, hcX + 2, hueY + HUE_BAR_H + 2, 0xFFFFFFFF);
+            ctx.fill(hcX,     hueY - 1, hcX + 1, hueY + HUE_BAR_H + 1, 0xFF000000);
+        }
 
         int swatchX = panelX + PANEL_W - PADDING - 32;
         int swatchY = hueY + HUE_BAR_H + 12;
-        ctx.fill(swatchX - 1, swatchY - 1, swatchX + 33, swatchY + 37, 0xFFAAAAAA);
-        ctx.fill(swatchX, swatchY, swatchX + 32, swatchY + 36, getCurrentArgb());
+        if (hasColor) {
+            ctx.fill(swatchX - 1, swatchY - 1, swatchX + 33, swatchY + 37, 0xFFAAAAAA);
+            ctx.fill(swatchX, swatchY, swatchX + 32, swatchY + 36, getCurrentArgb());
+        } else {
+            ctx.fill(swatchX - 1, swatchY - 1, swatchX + 33, swatchY,      0xFFAAAAAA);
+            ctx.fill(swatchX - 1, swatchY + 36, swatchX + 33, swatchY + 37, 0xFFAAAAAA);
+            ctx.fill(swatchX - 1, swatchY,      swatchX,      swatchY + 36, 0xFFAAAAAA);
+            ctx.fill(swatchX + 32, swatchY,     swatchX + 33, swatchY + 36, 0xFFAAAAAA);
+        }
 
         super.extractRenderState(ctx, mouseX, mouseY, delta);
     }
 
-    private static final int STRIP_W = 3;
-
     private void drawSVSquare(GuiGraphicsExtractor ctx) {
-        for (int col = 0; col < PICKER_SIZE; col += STRIP_W) {
-            float s = (float) col / (PICKER_SIZE - 1);
-            int topColor = hsvToArgb(hue, s, 1f);
-            int right = Math.min(svX + col + STRIP_W, svX + PICKER_SIZE);
-            ctx.fillGradient(svX + col, svY, right, svY + PICKER_SIZE, topColor, 0xFF000000);
-        }
+        ctx.pose().pushMatrix();
+        ctx.pose().translate(svX, svY + PICKER_SIZE);
+        ctx.pose().rotate((float) (-Math.PI / 2));
+        ctx.fillGradient(0, 0, PICKER_SIZE, PICKER_SIZE, 0xFFFFFFFF, hsvToArgb(hue, 1f, 1f));
+        ctx.pose().popMatrix();
+        ctx.fillGradient(svX, svY, svX + PICKER_SIZE, svY + PICKER_SIZE, 0x00000000, 0xFF000000);
     }
 
     private void drawHueBar(GuiGraphicsExtractor ctx) {
-        for (int col = 0; col < hueBarW; col += STRIP_W) {
-            float h = (float) col / (hueBarW - 1);
-            int right = Math.min(hueX + col + STRIP_W, hueX + hueBarW);
-            ctx.fill(hueX + col, hueY, right, hueY + HUE_BAR_H, hsvToArgb(h, 1f, 1f));
+        ctx.pose().pushMatrix();
+        ctx.pose().translate(hueX, hueY + HUE_BAR_H);
+        ctx.pose().rotate((float) (-Math.PI / 2));
+        for (int i = 0; i < 6; i++) {
+            int y1 = Math.round(i * (hueBarW / 6f));
+            int y2 = Math.round((i + 1) * (hueBarW / 6f));
+            ctx.fillGradient(0, y1, HUE_BAR_H, y2,
+                    hsvToArgb(i / 6f, 1f, 1f), hsvToArgb((i + 1) / 6f, 1f, 1f));
         }
+        ctx.pose().popMatrix();
     }
 
     @Override
@@ -181,12 +201,19 @@ public class ColorPickerScreen extends Screen {
     private void applySV(double mx, double my) {
         sat = clamp01((float)(mx - svX) / (PICKER_SIZE - 1));
         val = clamp01(1f - (float)(my - svY) / (PICKER_SIZE - 1));
+        selectColor();
         refreshFields();
     }
 
     private void applyHue(double mx) {
         hue = clamp01((float)(mx - hueX) / (hueBarW - 1));
+        selectColor();
         refreshFields();
+    }
+
+    private void selectColor() {
+        hasColor = true;
+        if (okButton != null) okButton.active = true;
     }
 
     private void onHexInput(String text) {
@@ -195,6 +222,7 @@ public class ColorPickerScreen extends Screen {
         if (t.length() == 6) {
             try {
                 fromArgb(0xFF000000 | Integer.parseInt(t, 16));
+                selectColor();
                 updatingFields = true;
                 int rgb = getCurrentArgb();
                 rField.setValue(String.valueOf((rgb >> 16) & 0xFF));
@@ -215,6 +243,7 @@ public class ColorPickerScreen extends Screen {
             int g = clamp255(gRaw);
             int b = clamp255(bRaw);
             fromArgb(0xFF000000 | (r << 16) | (g << 8) | b);
+            selectColor();
             updatingFields = true;
             if (r != rRaw) rField.setValue(String.valueOf(r));
             if (g != gRaw) gField.setValue(String.valueOf(g));

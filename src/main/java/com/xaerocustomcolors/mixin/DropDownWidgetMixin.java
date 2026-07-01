@@ -28,7 +28,7 @@ public class DropDownWidgetMixin {
         if (!screen.getClass().getName().equals("xaero.common.gui.GuiAddWaypoint")) return;
 
         int initial = WaypointScreenState.hasCustomColor
-                ? WaypointScreenState.customColor : 0xFFFFFFFF;
+                ? WaypointScreenState.customColor : 0;
         client.setScreen(new ColorPickerScreen(screen, initial, chosen -> {
             WaypointScreenState.customColor    = chosen;
             WaypointScreenState.hasCustomColor = true;

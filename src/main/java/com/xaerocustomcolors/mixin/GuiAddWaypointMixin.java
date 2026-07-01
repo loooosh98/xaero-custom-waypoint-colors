@@ -92,7 +92,7 @@ public class GuiAddWaypointMixin {
 
         if (index == WaypointScreenState.customSlotIndex) {
             int initial = WaypointScreenState.hasCustomColor
-                    ? WaypointScreenState.customColor : 0xFFFFFFFF;
+                    ? WaypointScreenState.customColor : 0;
             Screen self = (Screen)(Object) this;
             Minecraft.getInstance().setScreen(
                     new ColorPickerScreen(self, initial, chosen -> {
