@@ -13,7 +13,6 @@
     "issues": "https://github.com/loooosh98/xaero-custom-waypoint-colors/issues"
   },
   "license": "MIT",
-  "accessWidener": "xaerocustomcolors.accesswidener",
   "icon": "assets/xaerocustomcolors/icon.png",
   "environment": "client",
   "entrypoints": {

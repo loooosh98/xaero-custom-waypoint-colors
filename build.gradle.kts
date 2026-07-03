@@ -18,10 +18,6 @@ base {
     archivesName.set(archives_base_name)
 }
 
-loom {
-    accessWidenerPath.set(file("src/main/resources/xaerocustomcolors.accesswidener"))
-}
-
 repositories {
     maven("https://maven.fabricmc.net/")
     maven("https://api.modrinth.com/maven")
