@@ -52,7 +52,7 @@ public class XaeroCustomColors implements ClientModInitializer {
                 }
                 @SuppressWarnings("unchecked")
                 ArrayList<Waypoint> wps = (ArrayList<Waypoint>) waypointsEditedField.get(screen);
-                if (wps != null && !wps.isEmpty()) {
+                if (wps != null && wps.size() == 1) {
                     Waypoint wp = wps.get(0);
                     String ctx = XaeroContext.forWaypoint(wp);
                     if (ctx != null) {
