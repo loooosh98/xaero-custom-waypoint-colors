@@ -9,8 +9,10 @@ import xaero.common.minimap.waypoints.Waypoint;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -104,8 +106,14 @@ public class CustomColorManager {
                 Files.deleteIfExists(file);
                 return;
             }
-            try (Writer w = Files.newBufferedWriter(file)) {
+            Path tmp = file.resolveSibling(COLOR_FILE + ".tmp");
+            try (Writer w = Files.newBufferedWriter(tmp)) {
                 GSON.toJson(new HashMap<>(bucket), w);
+            }
+            try {
+                Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (Exception e) {
             com.xaerocustomcolors.XaeroCustomColors.LOGGER.error("Failed to save bucket " + ctxPath, e);
