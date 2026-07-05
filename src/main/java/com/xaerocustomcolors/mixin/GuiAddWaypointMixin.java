@@ -3,10 +3,8 @@ package com.xaerocustomcolors.mixin;
 import com.xaerocustomcolors.XaeroCustomColors;
 import com.xaerocustomcolors.color.CustomColorManager;
 import com.xaerocustomcolors.color.XaeroContext;
-import com.xaerocustomcolors.gui.ColorPickerScreen;
 import com.xaerocustomcolors.state.ColorInterceptState;
 import com.xaerocustomcolors.state.WaypointScreenState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -120,15 +118,7 @@ public class GuiAddWaypointMixin {
         if (dd != colorDD) return;
 
         if (index == WaypointScreenState.customSlotIndex) {
-            int initial = WaypointScreenState.hasCustomColor
-                    ? WaypointScreenState.customColor : 0;
-            Screen self = (Screen)(Object) this;
-            Minecraft.getInstance().gui.setScreen(
-                    new ColorPickerScreen(self, initial, chosen -> {
-                        WaypointScreenState.customColor    = chosen;
-                        WaypointScreenState.hasCustomColor = true;
-                        WaypointScreenState.justPickedColor = true;
-                    }));
+            XaeroCustomColors.openColorPicker((Screen)(Object) this);
             cir.setReturnValue(false);
             cir.cancel();
         }
