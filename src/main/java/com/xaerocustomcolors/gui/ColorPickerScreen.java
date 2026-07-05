@@ -6,6 +6,8 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
@@ -16,6 +18,10 @@ public class ColorPickerScreen extends Screen {
     private static final int PICKER_SIZE = PANEL_W - PADDING * 2; // fills panel width
     private static final int HUE_BAR_H  = 14;
     private static final int PANEL_H    = 325;
+    private static final int[] HUE_STOPS = new int[7];
+    static {
+        for (int i = 0; i < 7; i++) HUE_STOPS[i] = hsvToArgb(i / 6f, 1f, 1f);
+    }
 
     private final Screen parent;
     private final Consumer<Integer> callback;
@@ -149,8 +155,7 @@ public class ColorPickerScreen extends Screen {
         for (int i = 0; i < 6; i++) {
             int y1 = Math.round(i * (hueBarW / 6f));
             int y2 = Math.round((i + 1) * (hueBarW / 6f));
-            ctx.fillGradient(0, y1, HUE_BAR_H, y2,
-                    hsvToArgb(i / 6f, 1f, 1f), hsvToArgb((i + 1) / 6f, 1f, 1f));
+            ctx.fillGradient(0, y1, HUE_BAR_H, y2, HUE_STOPS[i], HUE_STOPS[i + 1]);
         }
         ctx.pose().popMatrix();
     }
@@ -199,14 +204,14 @@ public class ColorPickerScreen extends Screen {
     }
 
     private void applySV(double mx, double my) {
-        sat = clamp01((float)(mx - svX) / (PICKER_SIZE - 1));
-        val = clamp01(1f - (float)(my - svY) / (PICKER_SIZE - 1));
+        sat = Mth.clamp((float)(mx - svX) / (PICKER_SIZE - 1), 0f, 1f);
+        val = Mth.clamp(1f - (float)(my - svY) / (PICKER_SIZE - 1), 0f, 1f);
         selectColor();
         refreshFields();
     }
 
     private void applyHue(double mx) {
-        hue = clamp01((float)(mx - hueX) / (hueBarW - 1));
+        hue = Mth.clamp((float)(mx - hueX) / (hueBarW - 1), 0f, 1f);
         selectColor();
         refreshFields();
     }
@@ -221,13 +226,13 @@ public class ColorPickerScreen extends Screen {
         String t = text.startsWith("#") ? text.substring(1) : text;
         if (t.length() == 6) {
             try {
-                fromArgb(0xFF000000 | Integer.parseInt(t, 16));
+                fromArgb(ARGB.opaque(Integer.parseInt(t, 16)));
                 selectColor();
                 updatingFields = true;
                 int rgb = getCurrentArgb();
-                rField.setValue(String.valueOf((rgb >> 16) & 0xFF));
-                gField.setValue(String.valueOf((rgb >>  8) & 0xFF));
-                bField.setValue(String.valueOf( rgb        & 0xFF));
+                rField.setValue(String.valueOf(ARGB.red(rgb)));
+                gField.setValue(String.valueOf(ARGB.green(rgb)));
+                bField.setValue(String.valueOf(ARGB.blue(rgb)));
                 updatingFields = false;
             } catch (NumberFormatException ignored) {}
         }
@@ -239,10 +244,10 @@ public class ColorPickerScreen extends Screen {
             int rRaw = Integer.parseInt(rField.getValue().trim());
             int gRaw = Integer.parseInt(gField.getValue().trim());
             int bRaw = Integer.parseInt(bField.getValue().trim());
-            int r = clamp255(rRaw);
-            int g = clamp255(gRaw);
-            int b = clamp255(bRaw);
-            fromArgb(0xFF000000 | (r << 16) | (g << 8) | b);
+            int r = Mth.clamp(rRaw, 0, 255);
+            int g = Mth.clamp(gRaw, 0, 255);
+            int b = Mth.clamp(bRaw, 0, 255);
+            fromArgb(ARGB.color(r, g, b));
             selectColor();
             updatingFields = true;
             if (r != rRaw) rField.setValue(String.valueOf(r));
@@ -256,7 +261,7 @@ public class ColorPickerScreen extends Screen {
     private void refreshFields() {
         if (updatingFields || hexField == null) return;
         int argb = getCurrentArgb();
-        int r = (argb >> 16) & 0xFF, g = (argb >> 8) & 0xFF, b = argb & 0xFF;
+        int r = ARGB.red(argb), g = ARGB.green(argb), b = ARGB.blue(argb);
         updatingFields = true;
         hexField.setValue(String.format("#%02X%02X%02X", r, g, b));
         rField.setValue(String.valueOf(r));
@@ -270,7 +275,7 @@ public class ColorPickerScreen extends Screen {
     }
 
     private void fromArgb(int argb) {
-        rgbToHsv((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF);
+        rgbToHsv(ARGB.red(argb), ARGB.green(argb), ARGB.blue(argb));
     }
 
     static int hsvToArgb(float h, float s, float v) {
@@ -306,9 +311,6 @@ public class ColorPickerScreen extends Screen {
         this.sat = (mx == 0f) ? 0f : d / mx;
         this.val = mx;
     }
-
-    private static float clamp01(float v) { return Math.max(0f, Math.min(1f, v)); }
-    private static int   clamp255(int v)  { return Math.max(0, Math.min(255, v)); }
 
     @Override
     public void onClose() {
