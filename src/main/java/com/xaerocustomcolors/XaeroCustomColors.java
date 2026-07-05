@@ -2,14 +2,18 @@ package com.xaerocustomcolors;
 
 import com.xaerocustomcolors.color.CustomColorManager;
 import com.xaerocustomcolors.color.XaeroContext;
+import com.xaerocustomcolors.gui.ColorPickerScreen;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.util.ARGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xaero.common.minimap.waypoints.Waypoint;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,13 +24,14 @@ public class XaeroCustomColors implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final String CUSTOM_COLOR_LABEL = "\u00a77Custom";
 
-    private static final String GUI_ADD_WAYPOINT = "xaero.common.gui.GuiAddWaypoint";
+    public static final String GUI_ADD_WAYPOINT = "xaero.common.gui.GuiAddWaypoint";
 
     private static Field colorDDField;
     private static Field selectedField;
     private static Field realOptionsField;
     private static Field optionsField;
     private static Field waypointsEditedField;
+    private static WeakReference<Screen> lastEditScreen;
 
     @Override
     public void onInitializeClient() {
@@ -38,9 +43,9 @@ public class XaeroCustomColors implements ClientModInitializer {
     }
 
     private void handleWaypointEditScreen(Screen screen) {
-        if (WaypointScreenState.justPickedColor) {
-            WaypointScreenState.justPickedColor = false;
-        } else {
+        boolean reInit = lastEditScreen != null && lastEditScreen.get() == screen;
+        lastEditScreen = new WeakReference<>(screen);
+        if (!reInit) {
             Integer pending = WaypointScreenState.pendingReceivedColor;
             WaypointScreenState.pendingReceivedColor = null;
             WaypointScreenState.hasCustomColor = false;
@@ -67,7 +72,7 @@ public class XaeroCustomColors implements ClientModInitializer {
                 LOGGER.error("Failed to read waypoint data", e);
             }
             if (pending != null) {
-                WaypointScreenState.customColor    = 0xFF000000 | (pending & 0xFFFFFF);
+                WaypointScreenState.customColor    = ARGB.opaque(pending);
                 WaypointScreenState.hasCustomColor = true;
             }
         }
@@ -76,6 +81,15 @@ public class XaeroCustomColors implements ClientModInitializer {
                 ? formatCustomLabel(WaypointScreenState.customColor)
                 : CUSTOM_COLOR_LABEL;
         appendCustomDropdownEntry(screen, entryText, WaypointScreenState.hasCustomColor);
+    }
+
+    public static void openColorPicker(Screen parent) {
+        int initial = WaypointScreenState.hasCustomColor
+                ? WaypointScreenState.customColor : 0;
+        Minecraft.getInstance().setScreen(new ColorPickerScreen(parent, initial, chosen -> {
+            WaypointScreenState.customColor    = chosen;
+            WaypointScreenState.hasCustomColor = true;
+        }));
     }
 
     public static String formatCustomLabel(int argb) {

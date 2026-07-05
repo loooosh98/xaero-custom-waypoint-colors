@@ -1,6 +1,6 @@
 package com.xaerocustomcolors.mixin;
 
-import com.xaerocustomcolors.gui.ColorPickerScreen;
+import com.xaerocustomcolors.XaeroCustomColors;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,15 +25,9 @@ public class DropDownWidgetMixin {
         Minecraft client = Minecraft.getInstance();
         Screen screen = client.screen;
         if (screen == null) return;
-        if (!screen.getClass().getName().equals("xaero.common.gui.GuiAddWaypoint")) return;
+        if (!screen.getClass().getName().equals(XaeroCustomColors.GUI_ADD_WAYPOINT)) return;
 
-        int initial = WaypointScreenState.hasCustomColor
-                ? WaypointScreenState.customColor : 0;
-        client.setScreen(new ColorPickerScreen(screen, initial, chosen -> {
-            WaypointScreenState.customColor    = chosen;
-            WaypointScreenState.hasCustomColor = true;
-            WaypointScreenState.justPickedColor = true;
-        }));
+        XaeroCustomColors.openColorPicker(screen);
         ci.cancel();
     }
 }
