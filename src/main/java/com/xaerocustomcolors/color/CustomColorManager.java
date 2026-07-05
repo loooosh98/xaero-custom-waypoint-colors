@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.ARGB;
 import xaero.common.minimap.waypoints.Waypoint;
 
 import java.io.Reader;
@@ -49,20 +50,13 @@ public class CustomColorManager {
     public void setCustomColor(String ctxPath, Waypoint wp, int argbColor) {
         if (ctxPath == null || wp == null) return;
         Map<String, Integer> bucket = loadBucket(ctxPath);
-        bucket.put(wpKey(wp), 0xFF000000 | argbColor);
+        bucket.put(wpKey(wp), ARGB.opaque(argbColor));
         version.incrementAndGet();
         saveBucket(ctxPath);
     }
 
     public boolean removeCustomColor(String ctxPath, Waypoint wp) {
-        if (ctxPath == null || wp == null) return false;
-        Map<String, Integer> bucket = loadBucket(ctxPath);
-        boolean had = bucket.remove(wpKey(wp)) != null;
-        if (had) {
-            version.incrementAndGet();
-            saveBucket(ctxPath);
-        }
-        return had;
+        return wp != null && removeByKey(ctxPath, wpKey(wp));
     }
 
     public boolean removeByKey(String ctxPath, String wpKey) {
