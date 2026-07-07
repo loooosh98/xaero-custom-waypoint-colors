@@ -57,6 +57,7 @@ public class CustomColorManager {
         bucket.put(wpKey(wp), ARGB.opaque(argbColor));
         version.incrementAndGet();
         saveBucket(ctxPath);
+        LOGGER.info("[XCWC] Custom waypoint color saved successfully");
     }
 
     public boolean removeCustomColor(String ctxPath, Waypoint wp) {
@@ -70,6 +71,7 @@ public class CustomColorManager {
         if (had) {
             version.incrementAndGet();
             saveBucket(ctxPath);
+            LOGGER.info("[XCWC] Custom waypoint color deleted");
         }
         return had;
     }
@@ -102,7 +104,6 @@ public class CustomColorManager {
             Files.createDirectories(file.getParent());
             if (bucket.isEmpty()) {
                 Files.deleteIfExists(file);
-                LOGGER.info("[XCWC] Custom waypoint colors cleared");
                 return;
             }
             Path tmp = file.resolveSibling(COLOR_FILE + ".tmp");
@@ -114,7 +115,6 @@ public class CustomColorManager {
             } catch (AtomicMoveNotSupportedException e) {
                 Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
             }
-            LOGGER.info("[XCWC] Custom waypoint color saved successfully");
         } catch (Exception e) {
             LOGGER.error("[XCWC] Failed to save bucket " + ctxPath, e);
         }
