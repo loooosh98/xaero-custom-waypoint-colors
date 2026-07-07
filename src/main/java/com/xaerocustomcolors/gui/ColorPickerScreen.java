@@ -108,12 +108,13 @@ public class ColorPickerScreen extends Screen {
 
         drawSVSquare(ctx);
 
+        int cur = hasColor ? getCurrentArgb() : 0;
         if (hasColor) {
             int curX = svX + Math.round(sat * (PICKER_SIZE - 1));
             int curY = svY + Math.round((1f - val) * (PICKER_SIZE - 1));
             ctx.fill(curX - 3, curY - 3, curX + 4, curY + 4, 0xFFFFFFFF);
             ctx.fill(curX - 2, curY - 2, curX + 3, curY + 3, 0xFF000000);
-            ctx.fill(curX - 1, curY - 1, curX + 2, curY + 2, getCurrentArgb());
+            ctx.fill(curX - 1, curY - 1, curX + 2, curY + 2, cur);
         }
 
         drawHueBar(ctx);
@@ -128,7 +129,7 @@ public class ColorPickerScreen extends Screen {
         int swatchY = hueY + HUE_BAR_H + 12;
         if (hasColor) {
             ctx.fill(swatchX - 1, swatchY - 1, swatchX + 33, swatchY + 37, 0xFFAAAAAA);
-            ctx.fill(swatchX, swatchY, swatchX + 32, swatchY + 36, getCurrentArgb());
+            ctx.fill(swatchX, swatchY, swatchX + 32, swatchY + 36, cur);
         } else {
             ctx.fill(swatchX - 1, swatchY - 1, swatchX + 33, swatchY,      0xFFAAAAAA);
             ctx.fill(swatchX - 1, swatchY + 36, swatchX + 33, swatchY + 37, 0xFFAAAAAA);
@@ -229,10 +230,7 @@ public class ColorPickerScreen extends Screen {
                 fromArgb(ARGB.opaque(Integer.parseInt(t, 16)));
                 selectColor();
                 updatingFields = true;
-                int rgb = getCurrentArgb();
-                rField.setValue(String.valueOf(ARGB.red(rgb)));
-                gField.setValue(String.valueOf(ARGB.green(rgb)));
-                bField.setValue(String.valueOf(ARGB.blue(rgb)));
+                setRgbFields(getCurrentArgb());
                 updatingFields = false;
             } catch (NumberFormatException ignored) {}
         }
@@ -261,13 +259,16 @@ public class ColorPickerScreen extends Screen {
     private void refreshFields() {
         if (updatingFields || hexField == null) return;
         int argb = getCurrentArgb();
-        int r = ARGB.red(argb), g = ARGB.green(argb), b = ARGB.blue(argb);
         updatingFields = true;
-        hexField.setValue(String.format("#%02X%02X%02X", r, g, b));
-        rField.setValue(String.valueOf(r));
-        gField.setValue(String.valueOf(g));
-        bField.setValue(String.valueOf(b));
+        hexField.setValue(String.format("#%02X%02X%02X", ARGB.red(argb), ARGB.green(argb), ARGB.blue(argb)));
+        setRgbFields(argb);
         updatingFields = false;
+    }
+
+    private void setRgbFields(int argb) {
+        rField.setValue(String.valueOf(ARGB.red(argb)));
+        gField.setValue(String.valueOf(ARGB.green(argb)));
+        bField.setValue(String.valueOf(ARGB.blue(argb)));
     }
 
     private int getCurrentArgb() {

@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xaero.common.gui.GuiAddWaypoint;
 import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
 
 @Mixin(value = DropDownWidget.class, remap = false)
@@ -22,10 +23,8 @@ public class DropDownWidgetMixin {
         if (id != WaypointScreenState.customSlotIndex) return;
         if (id != selected) return;
 
-        Minecraft client = Minecraft.getInstance();
-        Screen screen = client.screen;
-        if (screen == null) return;
-        if (!screen.getClass().getName().equals(XaeroCustomColors.GUI_ADD_WAYPOINT)) return;
+        Screen screen = Minecraft.getInstance().screen;
+        if (!(screen instanceof GuiAddWaypoint)) return;
 
         XaeroCustomColors.openColorPicker(screen);
         ci.cancel();
