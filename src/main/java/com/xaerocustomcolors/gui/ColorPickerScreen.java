@@ -17,7 +17,7 @@ public class ColorPickerScreen extends Screen {
     private static final int PANEL_W    = 210;
     private static final int PICKER_SIZE = PANEL_W - PADDING * 2; // fills panel width
     private static final int HUE_BAR_H  = 14;
-    private static final int PANEL_H    = 325;
+    private static final int PANEL_H    = 311;
     private static final int[] HUE_STOPS = new int[7];
     static {
         for (int i = 0; i < 7; i++) HUE_STOPS[i] = hsvToArgb(i / 6f, 1f, 1f);
@@ -58,7 +58,7 @@ public class ColorPickerScreen extends Screen {
         panelX  = (width  - PANEL_W) / 2;
         panelY  = (height - PANEL_H) / 2;
         svX     = panelX + PADDING;
-        svY     = panelY + 24;
+        svY     = panelY + PADDING;
         hueX    = panelX + PADDING;
         hueY    = svY + PICKER_SIZE + 6;
         hueBarW = PANEL_W - PADDING * 2;
