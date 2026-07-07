@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
+
+import static com.xaerocustomcolors.XaeroCustomColors.LOGGER;
 
 public class CustomColorManager {
 
@@ -28,6 +31,7 @@ public class CustomColorManager {
     private static final Type MAP_TYPE = new TypeToken<Map<String, Integer>>() {}.getType();
     private static final String ROOT_DIR = "xaero_custom_waypoint_colors";
     private static final String COLOR_FILE = "colors.json";
+    private static final Pattern SANITIZE = Pattern.compile("[<>:\"\\\\|?*]");
 
     private final ConcurrentMap<String, ConcurrentMap<String, Integer>> bucketsByCtx = new ConcurrentHashMap<>();
     private final AtomicLong version = new AtomicLong();
@@ -83,7 +87,7 @@ public class CustomColorManager {
                         }
                     }
                 } catch (Exception e) {
-                    com.xaerocustomcolors.XaeroCustomColors.LOGGER.error("Failed to load bucket " + p, e);
+                    LOGGER.error("[XCWC] Failed to load bucket " + p, e);
                 }
             }
             return map;
@@ -98,6 +102,7 @@ public class CustomColorManager {
             Files.createDirectories(file.getParent());
             if (bucket.isEmpty()) {
                 Files.deleteIfExists(file);
+                LOGGER.info("[XCWC] Custom waypoint colors cleared");
                 return;
             }
             Path tmp = file.resolveSibling(COLOR_FILE + ".tmp");
@@ -109,8 +114,9 @@ public class CustomColorManager {
             } catch (AtomicMoveNotSupportedException e) {
                 Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
             }
+            LOGGER.info("[XCWC] Custom waypoint color saved successfully");
         } catch (Exception e) {
-            com.xaerocustomcolors.XaeroCustomColors.LOGGER.error("Failed to save bucket " + ctxPath, e);
+            LOGGER.error("[XCWC] Failed to save bucket " + ctxPath, e);
         }
     }
 
@@ -124,7 +130,7 @@ public class CustomColorManager {
     }
 
     private static String sanitize(String s) {
-        String r = s.replaceAll("[<>:\"\\\\|?*]", "_");
+        String r = SANITIZE.matcher(s).replaceAll("_");
         if (r.equals(".") || r.equals("..")) r = "_";
         return r.isEmpty() ? "_" : r;
     }
