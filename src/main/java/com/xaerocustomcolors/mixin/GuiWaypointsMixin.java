@@ -14,13 +14,13 @@ import xaero.common.minimap.waypoints.Waypoint;
 
 import java.util.ArrayList;
 
-// lambda$init$5 = disable/enable button (verify on every update)
+// lambda$init$4 = disable/enable button (verify on every update)
 @Mixin(value = GuiWaypoints.class, remap = false)
 public class GuiWaypointsMixin {
 
     @Shadow private ArrayList<Waypoint> getSelectedWaypointsList() { throw new AssertionError(); }
 
-    @Inject(method = "lambda$init$5", at = @At("HEAD"))
+    @Inject(method = "lambda$init$4", at = @At("HEAD"))
     private void xcc_removeDeletedColors(Button btn, CallbackInfo ci) {
         try {
             ArrayList<Waypoint> selected = getSelectedWaypointsList();

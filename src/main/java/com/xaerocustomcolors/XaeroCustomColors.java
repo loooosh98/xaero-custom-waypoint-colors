@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,16 +85,17 @@ public class XaeroCustomColors implements ClientModInitializer {
             if (colorDD == null) return;
             DropDownWidgetAccessor dd = (DropDownWidgetAccessor) colorDD;
 
-            String[] realOptions = dd.xcc_getRealOptions();
-            String[] options = dd.xcc_getOptions();
+            Component label = Component.literal(text);
+            Component[] realOptions = dd.xcc_getRealOptions();
+            Component[] options = dd.xcc_getOptions();
 
             int customRealIndex = realOptions.length;
-            String[] newReal = Arrays.copyOf(realOptions, customRealIndex + 1);
-            newReal[customRealIndex] = text;
+            Component[] newReal = Arrays.copyOf(realOptions, customRealIndex + 1);
+            newReal[customRealIndex] = label;
             dd.xcc_setRealOptions(newReal);
 
-            String[] newOpts = Arrays.copyOf(options, options.length + 1);
-            newOpts[options.length] = text;
+            Component[] newOpts = Arrays.copyOf(options, options.length + 1);
+            newOpts[options.length] = label;
             dd.xcc_setOptions(newOpts);
 
             WaypointScreenState.customSlotIndex = customRealIndex;

@@ -1,5 +1,6 @@
 package com.xaerocustomcolors.mixin;
 
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
@@ -8,14 +9,14 @@ import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
 public interface DropDownWidgetAccessor {
 
     @Accessor("realOptions")
-    String[] xcc_getRealOptions();
+    Component[] xcc_getRealOptions();
 
     @Accessor("realOptions")
-    void xcc_setRealOptions(String[] realOptions);
+    void xcc_setRealOptions(Component[] realOptions);
 
     @Accessor("options")
-    String[] xcc_getOptions();
+    Component[] xcc_getOptions();
 
     @Accessor("options")
-    void xcc_setOptions(String[] options);
+    void xcc_setOptions(Component[] options);
 }
