@@ -9,13 +9,18 @@ import xaero.common.minimap.waypoints.Waypoint;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
+
+import static com.xaerocustomcolors.XaeroCustomColors.LOGGER;
 
 public class CustomColorManager {
 
@@ -25,6 +30,7 @@ public class CustomColorManager {
     private static final Type MAP_TYPE = new TypeToken<Map<String, Integer>>() {}.getType();
     private static final String ROOT_DIR = "xaero_custom_waypoint_colors";
     private static final String COLOR_FILE = "colors.json";
+    private static final Pattern SANITIZE = Pattern.compile("[<>:\"\\\\|?*]");
 
     private final ConcurrentMap<String, ConcurrentMap<String, Integer>> bucketsByCtx = new ConcurrentHashMap<>();
     private final AtomicLong version = new AtomicLong();
@@ -45,20 +51,14 @@ public class CustomColorManager {
     public void setCustomColor(String ctxPath, Waypoint wp, int argbColor) {
         if (ctxPath == null || wp == null) return;
         Map<String, Integer> bucket = loadBucket(ctxPath);
-        bucket.put(wpKey(wp), 0xFF000000 | argbColor);
+        bucket.put(wpKey(wp), 0xFF000000 | (argbColor & 0xFFFFFF));
         version.incrementAndGet();
         saveBucket(ctxPath);
+        LOGGER.info("[XCWC] Custom waypoint color saved successfully");
     }
 
     public boolean removeCustomColor(String ctxPath, Waypoint wp) {
-        if (ctxPath == null || wp == null) return false;
-        Map<String, Integer> bucket = loadBucket(ctxPath);
-        boolean had = bucket.remove(wpKey(wp)) != null;
-        if (had) {
-            version.incrementAndGet();
-            saveBucket(ctxPath);
-        }
-        return had;
+        return wp != null && removeByKey(ctxPath, wpKey(wp));
     }
 
     public boolean removeByKey(String ctxPath, String wpKey) {
@@ -68,6 +68,7 @@ public class CustomColorManager {
         if (had) {
             version.incrementAndGet();
             saveBucket(ctxPath);
+            LOGGER.info("[XCWC] Custom waypoint color deleted");
         }
         return had;
     }
@@ -85,7 +86,7 @@ public class CustomColorManager {
                         }
                     }
                 } catch (Exception e) {
-                    com.xaerocustomcolors.XaeroCustomColors.LOGGER.error("Failed to load bucket " + p, e);
+                    LOGGER.error("[XCWC] Failed to load bucket " + p, e);
                 }
             }
             return map;
@@ -102,11 +103,17 @@ public class CustomColorManager {
                 Files.deleteIfExists(file);
                 return;
             }
-            try (Writer w = Files.newBufferedWriter(file)) {
+            Path tmp = file.resolveSibling(COLOR_FILE + ".tmp");
+            try (Writer w = Files.newBufferedWriter(tmp)) {
                 GSON.toJson(new HashMap<>(bucket), w);
             }
+            try {
+                Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (Exception e) {
-            com.xaerocustomcolors.XaeroCustomColors.LOGGER.error("Failed to save bucket " + ctxPath, e);
+            LOGGER.error("[XCWC] Failed to save bucket " + ctxPath, e);
         }
     }
 
@@ -120,7 +127,7 @@ public class CustomColorManager {
     }
 
     private static String sanitize(String s) {
-        String r = s.replaceAll("[<>:\"\\\\|?*]", "_");
+        String r = SANITIZE.matcher(s).replaceAll("_");
         if (r.equals(".") || r.equals("..")) r = "_";
         return r.isEmpty() ? "_" : r;
     }

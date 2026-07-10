@@ -23,11 +23,12 @@ public class MinimapWaypointMixin {
         if (xcc_cacheVersion != currentVersion) {
             Waypoint self = (Waypoint)(Object) this;
             String ctx = XaeroContext.forWaypoint(self);
-            xcc_cachedColor = ctx == null ? null : CustomColorManager.INSTANCE.getCustomColor(ctx, self);
+            Integer c = ctx == null ? null : CustomColorManager.INSTANCE.getCustomColor(ctx, self);
+            xcc_cachedColor = c == null ? null : c & 0xFFFFFF;
             xcc_cacheVersion = currentVersion;
         }
         if (xcc_cachedColor != null) {
-            ColorInterceptState.pendingCustomHex.set(xcc_cachedColor & 0xFFFFFF);
+            ColorInterceptState.pendingCustomHex.set(xcc_cachedColor);
         } else {
             ColorInterceptState.pendingCustomHex.remove();
         }

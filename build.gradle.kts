@@ -38,18 +38,18 @@ dependencies {
     xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
 }
 
-val unpackXaerolib by tasks.registering(Sync::class) {
-    from(provider { xaerolibSource.map { zipTree(it).matching { include("META-INF/jars/xaerolib-*.jar") } } })
-    eachFile { relativePath = RelativePath(true, name) }
-    includeEmptyDirs = false
-    into(layout.buildDirectory.dir("xaerolib"))
-}
+val xaerolibExtractDir = file(".gradle/xaerolib")
 
 dependencies {
-    compileOnly(fileTree(layout.buildDirectory.dir("xaerolib")) {
-        include("*.jar")
-        builtBy(unpackXaerolib)
-    })
+    modCompileOnly(files(provider {
+        sync {
+            from(xaerolibSource.resolve().map { zipTree(it).matching { include("META-INF/jars/xaerolib-*.jar") } })
+            eachFile { relativePath = RelativePath(true, name) }
+            includeEmptyDirs = false
+            into(xaerolibExtractDir)
+        }
+        fileTree(xaerolibExtractDir) { include("*.jar") }
+    }))
 }
 
 tasks.processResources {
