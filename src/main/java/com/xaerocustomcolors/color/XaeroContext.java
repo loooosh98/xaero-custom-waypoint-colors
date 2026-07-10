@@ -15,9 +15,7 @@ public final class XaeroContext {
 
     public static String forCurrentMinimap() {
         try {
-            MinimapSession s = BuiltInHudModules.MINIMAP.getCurrentSession();
-            if (s == null) return null;
-            MinimapWorldManager mgr = s.getWorldManager();
+            MinimapWorldManager mgr = currentWorldManager();
             if (mgr == null) return null;
             return forMinimapWorld(mgr.getCurrentWorld());
         } catch (Throwable t) {
@@ -31,7 +29,7 @@ public final class XaeroContext {
             MinimapWorldContainer c = w.getContainer();
             if (c != null && c.getPath() != null) {
                 String s = c.getPath().toString();
-                return (s == null || s.isEmpty()) ? null : s;
+                return s.isEmpty() ? null : s;
             }
         } catch (Throwable ignored) {}
         return null;
@@ -40,20 +38,30 @@ public final class XaeroContext {
     public static String forWaypoint(Waypoint wp) {
         if (wp == null) return null;
         try {
-            MinimapSession s = BuiltInHudModules.MINIMAP.getCurrentSession();
-            if (s == null) return null;
-            MinimapWorldManager mgr = s.getWorldManager();
+            MinimapWorldManager mgr = currentWorldManager();
             if (mgr == null) return null;
+            MinimapWorld current = mgr.getCurrentWorld();
+            if (current != null && containsWaypoint(current, wp)) return forMinimapWorld(current);
             MinimapWorldRootContainer root = mgr.getCurrentRootContainer();
             if (root == null) return null;
             for (MinimapWorld w : root.getAllWorldsIterable()) {
-                for (WaypointSet set : w.getIterableWaypointSets()) {
-                    for (Waypoint candidate : set.getWaypoints()) {
-                        if (candidate == wp) return forMinimapWorld(w);
-                    }
-                }
+                if (w != current && containsWaypoint(w, wp)) return forMinimapWorld(w);
             }
         } catch (Throwable ignored) {}
         return null;
+    }
+
+    private static MinimapWorldManager currentWorldManager() {
+        MinimapSession s = BuiltInHudModules.MINIMAP.getCurrentSession();
+        return s == null ? null : s.getWorldManager();
+    }
+
+    private static boolean containsWaypoint(MinimapWorld w, Waypoint wp) {
+        for (WaypointSet set : w.getIterableWaypointSets()) {
+            for (Waypoint candidate : set.getWaypoints()) {
+                if (candidate == wp) return true;
+            }
+        }
+        return false;
     }
 }

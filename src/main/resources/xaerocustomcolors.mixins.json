@@ -3,7 +3,9 @@
   "package": "com.xaerocustomcolors.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "DropDownWidgetAccessor",
     "DropDownWidgetMixin",
+    "GuiAddWaypointAccessor",
     "GuiAddWaypointMixin",
     "GuiWaypointsMixin",
     "MinimapWaypointMixin",

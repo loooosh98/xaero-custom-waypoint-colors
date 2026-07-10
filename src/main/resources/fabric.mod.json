@@ -13,7 +13,6 @@
     "issues": "https://github.com/loooosh98/xaero-custom-waypoint-colors/issues"
   },
   "license": "MIT",
-  "accessWidener": "xaerocustomcolors.accesswidener",
   "icon": "assets/xaerocustomcolors/icon.png",
   "environment": "client",
   "entrypoints": {
@@ -29,7 +28,7 @@
     "fabricloader": ">=0.15.0",
     "fabric-api":   "*",
     "minecraft":    "~1.21.11",
-    "xaerominimap": "*"
+    "xaerominimap": ">=${minimap_version}"
   },
   "suggests": {
     "xaeroworldmap": "*"
