@@ -10,7 +10,7 @@
 
 </div>
 
-XCWC is a **Fabric only** mod that adds to xaero96's 'Xaero's Minimap' mod, specifically its waypoint feature.
+XCWC is a mod that adds to xaero96's 'Xaero's Minimap' mod, specifically its waypoint feature.
 
 It allows you to choose a custom color for a waypoint in the waypoint creation menu, giving you more customization of your waypoints, instead of being limited to the boring preset colors.
 
