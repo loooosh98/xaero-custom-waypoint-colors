@@ -61,10 +61,12 @@ public class XaeroCustomColors implements ClientModInitializer {
             if (pending != null) {
                 WaypointScreenState.customColor = ARGB.opaque(pending);
             }
+            WaypointScreenState.customSelected = WaypointScreenState.customColor != null;
         }
 
         Integer c = WaypointScreenState.customColor;
-        appendCustomDropdownEntry(screen, c != null ? formatCustomLabel(c) : CUSTOM_COLOR_LABEL, c != null);
+        appendCustomDropdownEntry(screen, c != null ? formatCustomLabel(c) : CUSTOM_COLOR_LABEL,
+                WaypointScreenState.customSelected);
     }
 
     public static void openColorPicker(Screen parent) {
@@ -72,6 +74,7 @@ public class XaeroCustomColors implements ClientModInitializer {
         int initial = c != null ? c : 0;
         Minecraft.getInstance().gui.setScreen(new ColorPickerScreen(parent, initial, chosen -> {
             WaypointScreenState.customColor = chosen;
+            WaypointScreenState.customSelected = true;
         }));
     }
 
@@ -104,7 +107,7 @@ public class XaeroCustomColors implements ClientModInitializer {
                 colorDD.selectId(customRealIndex, false);
             }
 
-            LOGGER.info("[XCWC] Custom entry added to color dropdown");
+            LOGGER.debug("[XCWC] Custom entry added to color dropdown");
         } catch (Exception e) {
             LOGGER.error("[XCWC] Failed to append custom dropdown entry", e);
         }

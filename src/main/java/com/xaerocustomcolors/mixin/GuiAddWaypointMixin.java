@@ -58,6 +58,9 @@ public class GuiAddWaypointMixin {
                     && colorDD.getSelected() == WaypointScreenState.customSlotIndex;
             Integer chosen = WaypointScreenState.customColor;
 
+            int saved = 0;
+            int removed = 0;
+
             int n = waypointsEdited.size();
             for (int i = 0; i < n; i++) {
                 Waypoint wp = waypointsEdited.get(i);
@@ -71,26 +74,31 @@ public class GuiAddWaypointMixin {
 
                 if (customIsSelected && chosen != null) {
                     if (rekeyed) CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
-                    CustomColorManager.INSTANCE.setCustomColor(ctx, wp, chosen);
+                    if (CustomColorManager.INSTANCE.setCustomColor(ctx, wp, chosen)) saved++;
                 } else if (!customIsSelected && chosen != null) {
                     if (rekeyed) CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
-                    CustomColorManager.INSTANCE.removeCustomColor(ctx, wp);
+                    if (CustomColorManager.INSTANCE.removeCustomColor(ctx, wp)) removed++;
                 } else {
                     Integer prevColor = prev != null ? prev.color() : null;
                     if (prevColor == null) {
-                        CustomColorManager.INSTANCE.removeCustomColor(ctx, wp);
+                        if (CustomColorManager.INSTANCE.removeCustomColor(ctx, wp)) removed++;
                     } else if (wp.getWaypointColor() != prev.wpColor()) {
                         if (rekeyed) CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
-                        CustomColorManager.INSTANCE.removeCustomColor(ctx, wp);
+                        if (CustomColorManager.INSTANCE.removeCustomColor(ctx, wp)) removed++;
                     } else if (rekeyed) {
                         CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
-                        CustomColorManager.INSTANCE.setCustomColor(ctx, wp, prevColor);
+                        if (CustomColorManager.INSTANCE.setCustomColor(ctx, wp, prevColor)) saved++;
                     }
                 }
             }
+
+            if (saved > 0) XaeroCustomColors.LOGGER.info("[XCWC] Custom waypoint color saved successfully ({})", saved);
+            if (removed > 0) XaeroCustomColors.LOGGER.info("[XCWC] Custom waypoint color deleted ({})", removed);
+
             ColorInterceptState.pendingCustomHex.remove();
         } finally {
             WaypointScreenState.customColor = null;
+            WaypointScreenState.customSelected = false;
             xcc_prev = null;
         }
     }
@@ -108,6 +116,8 @@ public class GuiAddWaypointMixin {
         if (index == WaypointScreenState.customSlotIndex) {
             XaeroCustomColors.openColorPicker((Screen)(Object) this);
             cir.setReturnValue(false);
+        } else {
+            WaypointScreenState.customSelected = false;
         }
     }
 }

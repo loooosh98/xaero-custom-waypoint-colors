@@ -51,13 +51,17 @@ public class CustomColorManager {
         return bucket.get(key);
     }
 
-    public void setCustomColor(String ctxPath, Waypoint wp, int argbColor) {
-        if (ctxPath == null || wp == null) return;
+    public boolean setCustomColor(String ctxPath, Waypoint wp, int argbColor) {
+        if (ctxPath == null || wp == null) return false;
         Map<String, Integer> bucket = loadBucket(ctxPath);
-        bucket.put(wpKey(wp), ARGB.opaque(argbColor));
+        String key = wpKey(wp);
+        int color = ARGB.opaque(argbColor);
+        Integer old = bucket.get(key);
+        if (old != null && old.intValue() == color) return false;
+        bucket.put(key, color);
         version.incrementAndGet();
         saveBucket(ctxPath);
-        LOGGER.info("[XCWC] Custom waypoint color saved successfully");
+        return true;
     }
 
     public boolean removeCustomColor(String ctxPath, Waypoint wp) {
@@ -71,7 +75,6 @@ public class CustomColorManager {
         if (had) {
             version.incrementAndGet();
             saveBucket(ctxPath);
-            LOGGER.info("[XCWC] Custom waypoint color deleted");
         }
         return had;
     }
