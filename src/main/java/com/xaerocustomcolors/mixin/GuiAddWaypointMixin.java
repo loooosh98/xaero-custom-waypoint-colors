@@ -16,7 +16,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xaero.common.gui.GuiAddWaypoint;
+import xaero.common.gui.GuiWaypointWorlds;
 import xaero.common.minimap.waypoints.Waypoint;
+import xaero.hud.minimap.world.MinimapWorld;
+import xaero.hud.minimap.world.MinimapWorldManager;
 import xaero.lib.client.config.ClientConfigManager;
 import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
 
@@ -27,6 +30,9 @@ public class GuiAddWaypointMixin {
 
     @Shadow private ArrayList<Waypoint> waypointsEdited;
     @Shadow private DropDownWidget colorDD;
+    @Shadow private MinimapWorldManager manager;
+    @Shadow private GuiWaypointWorlds worlds;
+    @Shadow private MinimapWorld defaultWorld;
 
     // Pre-save keys for detecting renames / coord changes.
     @Unique private WaypointSnapshot[] xcc_prev;
@@ -37,11 +43,12 @@ public class GuiAddWaypointMixin {
     private void xcc_enterSave(ClientConfigManager config, Button btn, CallbackInfo ci) {
         xcc_prev = null;
         if (waypointsEdited == null) return;
+        String srcCtx = XaeroContext.forMinimapWorld(defaultWorld);
         int n = waypointsEdited.size();
         xcc_prev = new WaypointSnapshot[n];
         for (int i = 0; i < n; i++) {
             Waypoint wp = waypointsEdited.get(i);
-            String ctx = XaeroContext.forWaypoint(wp);
+            String ctx = srcCtx != null ? srcCtx : XaeroContext.forWaypoint(wp);
             xcc_prev[i] = new WaypointSnapshot(ctx, CustomColorManager.wpKey(wp),
                     ctx == null ? null : CustomColorManager.INSTANCE.getCustomColor(ctx, wp),
                     wp.getWaypointColor());
@@ -61,32 +68,42 @@ public class GuiAddWaypointMixin {
             int saved = 0;
             int removed = 0;
 
+            String destCtx = null;
+            try {
+                if (manager != null && worlds != null) {
+                    destCtx = XaeroContext.forMinimapWorld(manager.getWorld(worlds.getCurrentKey()));
+                }
+            } catch (Throwable ignored) {}
+
             int n = waypointsEdited.size();
             for (int i = 0; i < n; i++) {
                 Waypoint wp = waypointsEdited.get(i);
                 WaypointSnapshot prev = (xcc_prev != null && i < xcc_prev.length) ? xcc_prev[i] : null;
-                String ctx = prev != null && prev.ctx() != null ? prev.ctx() : XaeroContext.forWaypoint(wp);
+                if (wp.isThirdParty()) continue;
+                String ctx = destCtx != null ? destCtx : XaeroContext.forWaypoint(wp);
+                if (ctx == null && prev != null) ctx = prev.ctx();
                 if (ctx == null) continue;
                 String newKey = CustomColorManager.wpKey(wp);
 
                 String oldKey = prev != null ? prev.key() : null;
-                boolean rekeyed = oldKey != null && !oldKey.equals(newKey);
+                String oldCtx = prev != null && prev.ctx() != null ? prev.ctx() : ctx;
+                boolean relocated = oldKey != null && (!oldKey.equals(newKey) || !oldCtx.equals(ctx));
 
                 if (customIsSelected && chosen != null) {
-                    if (rekeyed) CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
+                    if (relocated) CustomColorManager.INSTANCE.removeByKey(oldCtx, oldKey);
                     if (CustomColorManager.INSTANCE.setCustomColor(ctx, wp, chosen)) saved++;
-                } else if (!customIsSelected && chosen != null) {
-                    if (rekeyed) CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
+                } else if (chosen != null) {
+                    if (relocated) CustomColorManager.INSTANCE.removeByKey(oldCtx, oldKey);
                     if (CustomColorManager.INSTANCE.removeCustomColor(ctx, wp)) removed++;
                 } else {
                     Integer prevColor = prev != null ? prev.color() : null;
                     if (prevColor == null) {
                         if (CustomColorManager.INSTANCE.removeCustomColor(ctx, wp)) removed++;
                     } else if (wp.getWaypointColor() != prev.wpColor()) {
-                        if (rekeyed) CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
+                        if (relocated) CustomColorManager.INSTANCE.removeByKey(oldCtx, oldKey);
                         if (CustomColorManager.INSTANCE.removeCustomColor(ctx, wp)) removed++;
-                    } else if (rekeyed) {
-                        CustomColorManager.INSTANCE.removeByKey(ctx, oldKey);
+                    } else if (relocated) {
+                        CustomColorManager.INSTANCE.removeByKey(oldCtx, oldKey);
                         if (CustomColorManager.INSTANCE.setCustomColor(ctx, wp, prevColor)) saved++;
                     }
                 }
@@ -95,8 +112,8 @@ public class GuiAddWaypointMixin {
             if (saved > 0) XaeroCustomColors.LOGGER.info("[XCWC] Custom waypoint color saved successfully ({})", saved);
             if (removed > 0) XaeroCustomColors.LOGGER.info("[XCWC] Custom waypoint color deleted ({})", removed);
 
-            ColorInterceptState.pendingCustomHex.remove();
         } finally {
+            ColorInterceptState.pendingCustomHex.remove();
             WaypointScreenState.customColor = null;
             WaypointScreenState.customSelected = false;
             xcc_prev = null;
