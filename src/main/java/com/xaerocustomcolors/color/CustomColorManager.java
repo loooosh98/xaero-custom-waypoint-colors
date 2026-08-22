@@ -5,8 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.ARGB;
+import org.apache.commons.io.file.PathUtils;
 import xaero.common.minimap.waypoints.Waypoint;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
@@ -79,6 +81,26 @@ public class CustomColorManager {
         return had;
     }
 
+    public void deleteContainer(String containerNode) {
+        if (containerNode == null || containerNode.isEmpty()) return;
+        Path root = FabricLoader.getInstance().getGameDir().resolve(ROOT_DIR).normalize();
+        Path target = bucketDir(containerNode).normalize();
+        if (!root.equals(target.getParent())) return;
+
+        String prefix = containerNode + "/";
+        if (bucketsByCtx.keySet().removeIf(ctx -> ctx.equals(containerNode) || ctx.startsWith(prefix))) {
+            version.incrementAndGet();
+        }
+
+        if (!Files.isDirectory(target)) return;
+        try {
+            PathUtils.deleteDirectory(target);
+            LOGGER.info("[XCWC] Deleted world folder for ({})", containerNode);
+        } catch (IOException e) {
+            LOGGER.error("[XCWC] Failed to delete custom color folder " + target, e);
+        }
+    }
+
     private Map<String, Integer> loadBucket(String ctxPath) {
         return bucketsByCtx.computeIfAbsent(ctxPath, p -> {
             ConcurrentMap<String, Integer> map = new ConcurrentHashMap<>();
@@ -123,13 +145,17 @@ public class CustomColorManager {
         }
     }
 
-    private Path bucketFile(String ctxPath) {
+    private Path bucketDir(String ctxPath) {
         Path target = FabricLoader.getInstance().getGameDir().resolve(ROOT_DIR);
         for (String seg : ctxPath.split("/")) {
             if (seg.isEmpty()) continue;
             target = target.resolve(sanitize(seg));
         }
-        return target.resolve(COLOR_FILE);
+        return target;
+    }
+
+    private Path bucketFile(String ctxPath) {
+        return bucketDir(ctxPath).resolve(COLOR_FILE);
     }
 
     private static String sanitize(String s) {

@@ -8,6 +8,7 @@
     "GuiAddWaypointAccessor",
     "GuiAddWaypointMixin",
     "GuiWaypointsMixin",
+    "LevelStorageAccessMixin",
     "MinimapWaypointMixin",
     "WaypointColorMixin",
     "WaypointSharingHandlerMixin"
