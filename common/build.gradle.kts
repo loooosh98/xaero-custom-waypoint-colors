@@ -2,29 +2,26 @@ plugins {
     id("net.fabricmc.fabric-loom")
 }
 
-val mod_version: String by project
-val archives_base_name: String by project
-val minecraft_version: String by project
-val loader_version: String by project
-val minimap_version: String by project
-val worldmap_version: String by project
-
-version = mod_version
+val MINECRAFT_VERSION: String by rootProject.extra
+val FABRIC_LOADER_VERSION: String by rootProject.extra
+val MINIMAP_VERSION: String by rootProject.extra
+val WORLDMAP_VERSION: String by rootProject.extra
+val ARCHIVE_NAME: String by rootProject.extra
 
 base {
-    archivesName.set("$archives_base_name-common")
+    archivesName.set("$ARCHIVE_NAME-common")
 }
 
 val xaerolibSource: Configuration by configurations.creating
 
 dependencies {
-    minecraft("com.mojang:minecraft:$minecraft_version")
-    implementation("net.fabricmc:fabric-loader:$loader_version")
+    minecraft("com.mojang:minecraft:$MINECRAFT_VERSION")
+    implementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
 
-    compileOnly("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
-    compileOnly("maven.modrinth:xaeros-world-map:fabric-$minecraft_version-$worldmap_version")
+    compileOnly("maven.modrinth:xaeros-minimap:fabric-$MINECRAFT_VERSION-$MINIMAP_VERSION")
+    compileOnly("maven.modrinth:xaeros-world-map:fabric-$MINECRAFT_VERSION-$WORLDMAP_VERSION")
 
-    xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
+    xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$MINECRAFT_VERSION-$MINIMAP_VERSION")
 }
 
 val unpackXaerolib by tasks.registering(Sync::class) {

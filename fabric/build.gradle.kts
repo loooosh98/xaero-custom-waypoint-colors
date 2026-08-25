@@ -2,18 +2,15 @@ plugins {
     id("net.fabricmc.fabric-loom")
 }
 
-val mod_version: String by project
-val archives_base_name: String by project
-val minecraft_version: String by project
-val loader_version: String by project
-val fabric_version: String by project
-val minimap_version: String by project
-val worldmap_version: String by project
-
-version = mod_version
+val MINECRAFT_VERSION: String by rootProject.extra
+val FABRIC_LOADER_VERSION: String by rootProject.extra
+val FABRIC_API_VERSION: String by rootProject.extra
+val MINIMAP_VERSION: String by rootProject.extra
+val WORLDMAP_VERSION: String by rootProject.extra
+val ARCHIVE_NAME: String by rootProject.extra
 
 base {
-    archivesName.set(archives_base_name)
+    archivesName.set(ARCHIVE_NAME)
 }
 
 val common = project(":common")
@@ -21,16 +18,16 @@ val common = project(":common")
 val xaerolibSource: Configuration by configurations.creating
 
 dependencies {
-    minecraft("com.mojang:minecraft:$minecraft_version")
-    implementation("net.fabricmc:fabric-loader:$loader_version")
-    implementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
+    minecraft("com.mojang:minecraft:$MINECRAFT_VERSION")
+    implementation("net.fabricmc:fabric-loader:$FABRIC_LOADER_VERSION")
+    implementation("net.fabricmc.fabric-api:fabric-api:$FABRIC_API_VERSION")
 
-    compileOnly("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
-    compileOnly("maven.modrinth:xaeros-world-map:fabric-$minecraft_version-$worldmap_version")
+    compileOnly("maven.modrinth:xaeros-minimap:fabric-$MINECRAFT_VERSION-$MINIMAP_VERSION")
+    compileOnly("maven.modrinth:xaeros-world-map:fabric-$MINECRAFT_VERSION-$WORLDMAP_VERSION")
 
     compileOnly(common)
 
-    xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
+    xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$MINECRAFT_VERSION-$MINIMAP_VERSION")
 }
 
 val unpackXaerolib by tasks.registering(Sync::class) {
@@ -49,14 +46,14 @@ dependencies {
 
 tasks.processResources {
     inputs.property("version", project.version)
-    inputs.property("minimap_version", minimap_version)
+    inputs.property("minimap_version", MINIMAP_VERSION)
 
     from(common.file("src/main/resources"))
 
     filesMatching("fabric.mod.json") {
         expand(
             "version" to project.version,
-            "minimap_version" to minimap_version
+            "minimap_version" to MINIMAP_VERSION
         )
     }
 }
@@ -65,7 +62,7 @@ tasks.jar {
     from(common.sourceSets["main"].output.classesDirs)
 
     from(rootProject.file("LICENSE")) {
-        rename { "${it}_$archives_base_name" }
+        rename { "${it}_$ARCHIVE_NAME" }
     }
 }
 
