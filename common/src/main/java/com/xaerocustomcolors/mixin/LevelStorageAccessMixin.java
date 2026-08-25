@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class LevelStorageAccessMixin {
 
     @Inject(method = "deleteLevel", at = @At("RETURN"))
-    private void xcc_deleteWorldColors(CallbackInfo ci) {
+    private void xcwc_deleteWorldColors(CallbackInfo ci) {
         try {
             LevelStorageSource.LevelStorageAccess self = (LevelStorageSource.LevelStorageAccess) (Object) this;
             CustomColorManager.INSTANCE.deleteContainer(

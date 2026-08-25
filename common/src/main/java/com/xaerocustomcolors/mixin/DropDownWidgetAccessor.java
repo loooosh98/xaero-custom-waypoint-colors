@@ -9,14 +9,14 @@ import xaero.lib.client.gui.widget.dropdown.DropDownWidget;
 public interface DropDownWidgetAccessor {
 
     @Accessor("realOptions")
-    Component[] xcc_getRealOptions();
+    Component[] xcwc_getRealOptions();
 
     @Accessor("realOptions")
-    void xcc_setRealOptions(Component[] realOptions);
+    void xcwc_setRealOptions(Component[] realOptions);
 
     @Accessor("options")
-    Component[] xcc_getOptions();
+    Component[] xcwc_getOptions();
 
     @Accessor("options")
-    void xcc_setOptions(Component[] options);
+    void xcwc_setOptions(Component[] options);
 }

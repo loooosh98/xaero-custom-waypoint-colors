@@ -3,7 +3,7 @@ package com.xaerocustomcolors.color;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import net.fabricmc.loader.api.FabricLoader;
+import com.xaerocustomcolors.XcwcPlatform;
 import net.minecraft.util.ARGB;
 import org.apache.commons.io.file.PathUtils;
 import xaero.common.minimap.waypoints.Waypoint;
@@ -83,7 +83,7 @@ public class CustomColorManager {
 
     public void deleteContainer(String containerNode) {
         if (containerNode == null || containerNode.isEmpty()) return;
-        Path root = FabricLoader.getInstance().getGameDir().resolve(ROOT_DIR).normalize();
+        Path root = XcwcPlatform.gameDir().resolve(ROOT_DIR).normalize();
         Path target = bucketDir(containerNode).normalize();
         if (!root.equals(target.getParent())) return;
 
@@ -146,7 +146,7 @@ public class CustomColorManager {
     }
 
     private Path bucketDir(String ctxPath) {
-        Path target = FabricLoader.getInstance().getGameDir().resolve(ROOT_DIR);
+        Path target = XcwcPlatform.gameDir().resolve(ROOT_DIR);
         for (String seg : ctxPath.split("/")) {
             if (seg.isEmpty()) continue;
             target = target.resolve(sanitize(seg));

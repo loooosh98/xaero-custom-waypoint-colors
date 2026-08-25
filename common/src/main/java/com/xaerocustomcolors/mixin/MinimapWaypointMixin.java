@@ -14,21 +14,21 @@ import xaero.hud.minimap.waypoint.WaypointColor;
 @Mixin(value = Waypoint.class, remap = false)
 public class MinimapWaypointMixin {
 
-    @Unique private transient Integer xcc_cachedColor;
-    @Unique private transient long    xcc_cacheVersion = -1;
+    @Unique private transient Integer xcwc_cachedColor;
+    @Unique private transient long    xcwc_cacheVersion = -1;
 
     @Inject(method = "getWaypointColor", at = @At("RETURN"))
-    private void xcc_signalCustomColor(CallbackInfoReturnable<WaypointColor> cir) {
+    private void xcwc_signalCustomColor(CallbackInfoReturnable<WaypointColor> cir) {
         long currentVersion = CustomColorManager.INSTANCE.getVersion();
-        if (xcc_cacheVersion != currentVersion) {
+        if (xcwc_cacheVersion != currentVersion) {
             Waypoint self = (Waypoint)(Object) this;
             String ctx = XaeroContext.forWaypoint(self);
             Integer c = ctx == null ? null : CustomColorManager.INSTANCE.getCustomColor(ctx, self);
-            xcc_cachedColor = c == null ? null : c & 0xFFFFFF;
-            xcc_cacheVersion = currentVersion;
+            xcwc_cachedColor = c == null ? null : c & 0xFFFFFF;
+            xcwc_cacheVersion = currentVersion;
         }
-        if (xcc_cachedColor != null) {
-            ColorInterceptState.pendingCustomHex.set(xcc_cachedColor);
+        if (xcwc_cachedColor != null) {
+            ColorInterceptState.pendingCustomHex.set(xcwc_cachedColor);
         } else {
             ColorInterceptState.pendingCustomHex.remove();
         }

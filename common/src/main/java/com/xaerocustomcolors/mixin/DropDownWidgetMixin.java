@@ -18,7 +18,7 @@ public class DropDownWidgetMixin {
     @Shadow private int selected;
 
     @Inject(method = "selectId", at = @At("HEAD"), cancellable = true)
-    private void xcc_reopenPickerOnCustomReselect(int id, boolean callCallback, CallbackInfo ci) {
+    private void xcwc_reopenPickerOnCustomReselect(int id, boolean callCallback, CallbackInfo ci) {
         if (!callCallback) return;
         if (id != WaypointScreenState.customSlotIndex) return;
         if (id != selected) return;

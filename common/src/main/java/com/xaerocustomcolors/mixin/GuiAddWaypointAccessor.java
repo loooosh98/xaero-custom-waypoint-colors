@@ -12,8 +12,8 @@ import java.util.ArrayList;
 public interface GuiAddWaypointAccessor {
 
     @Accessor("colorDD")
-    DropDownWidget xcc_getColorDD();
+    DropDownWidget xcwc_getColorDD();
 
     @Accessor("waypointsEdited")
-    ArrayList<Waypoint> xcc_getWaypointsEdited();
+    ArrayList<Waypoint> xcwc_getWaypointsEdited();
 }

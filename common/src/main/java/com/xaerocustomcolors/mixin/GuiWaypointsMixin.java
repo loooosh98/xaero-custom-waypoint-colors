@@ -21,7 +21,7 @@ public class GuiWaypointsMixin {
     @Shadow private ArrayList<Waypoint> getSelectedWaypointsList() { throw new AssertionError(); }
 
     @Inject(method = "lambda$init$4", at = @At("HEAD"))
-    private void xcc_removeDeletedColors(Button btn, CallbackInfo ci) {
+    private void xcwc_removeDeletedColors(Button btn, CallbackInfo ci) {
         try {
             ArrayList<Waypoint> selected = getSelectedWaypointsList();
             if (selected == null || selected.isEmpty()) return;

@@ -11,7 +11,7 @@ import xaero.hud.minimap.waypoint.WaypointColor;
 public class WaypointColorMixin {
 
     @Inject(method = "getHex", at = @At("HEAD"), cancellable = true)
-    private void xcc_overrideHex(CallbackInfoReturnable<Integer> cir) {
+    private void xcwc_overrideHex(CallbackInfoReturnable<Integer> cir) {
         Integer custom = ColorInterceptState.pendingCustomHex.get();
         ColorInterceptState.pendingCustomHex.remove();
         if (custom != null) {

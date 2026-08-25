@@ -6,8 +6,6 @@ import com.xaerocustomcolors.gui.ColorPickerScreen;
 import com.xaerocustomcolors.mixin.DropDownWidgetAccessor;
 import com.xaerocustomcolors.mixin.GuiAddWaypointAccessor;
 import com.xaerocustomcolors.state.WaypointScreenState;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -23,23 +21,20 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class XaeroCustomColors implements ClientModInitializer {
+public class XaeroCustomColors {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("xaerocustomwaypointcolors");
     public static final String CUSTOM_COLOR_LABEL = ChatFormatting.GRAY + "Custom";
 
     private static WeakReference<Screen> lastEditScreen;
 
-    @Override
-    public void onInitializeClient() {
-        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (screen instanceof GuiAddWaypoint) {
-                handleWaypointEditScreen((GuiAddWaypoint) screen);
-            }
-        });
+    public static void onScreenInit(Screen screen) {
+        if (screen instanceof GuiAddWaypoint) {
+            handleWaypointEditScreen((GuiAddWaypoint) screen);
+        }
     }
 
-    private void handleWaypointEditScreen(GuiAddWaypoint screen) {
+    private static void handleWaypointEditScreen(GuiAddWaypoint screen) {
         boolean reInit = lastEditScreen != null && lastEditScreen.get() == screen;
         lastEditScreen = new WeakReference<>(screen);
         if (!reInit) {
@@ -47,7 +42,7 @@ public class XaeroCustomColors implements ClientModInitializer {
             WaypointScreenState.pendingReceivedColor = null;
             WaypointScreenState.customColor = null;
             try {
-                ArrayList<Waypoint> wps = ((GuiAddWaypointAccessor) screen).xcc_getWaypointsEdited();
+                ArrayList<Waypoint> wps = ((GuiAddWaypointAccessor) screen).xcwc_getWaypointsEdited();
                 if (wps != null && wps.size() == 1) {
                     Waypoint wp = wps.get(0);
                     String ctx = XaeroContext.forWaypoint(wp);
@@ -84,22 +79,22 @@ public class XaeroCustomColors implements ClientModInitializer {
 
     private static void appendCustomDropdownEntry(GuiAddWaypoint screen, String text, boolean select) {
         try {
-            DropDownWidget colorDD = ((GuiAddWaypointAccessor) screen).xcc_getColorDD();
+            DropDownWidget colorDD = ((GuiAddWaypointAccessor) screen).xcwc_getColorDD();
             if (colorDD == null) return;
             DropDownWidgetAccessor dd = (DropDownWidgetAccessor) colorDD;
 
             Component label = Component.literal(text);
-            Component[] realOptions = dd.xcc_getRealOptions();
-            Component[] options = dd.xcc_getOptions();
+            Component[] realOptions = dd.xcwc_getRealOptions();
+            Component[] options = dd.xcwc_getOptions();
 
             int customRealIndex = realOptions.length;
             Component[] newReal = Arrays.copyOf(realOptions, customRealIndex + 1);
             newReal[customRealIndex] = label;
-            dd.xcc_setRealOptions(newReal);
+            dd.xcwc_setRealOptions(newReal);
 
             Component[] newOpts = Arrays.copyOf(options, options.length + 1);
             newOpts[options.length] = label;
-            dd.xcc_setOptions(newOpts);
+            dd.xcwc_setOptions(newOpts);
 
             WaypointScreenState.customSlotIndex = customRealIndex;
 

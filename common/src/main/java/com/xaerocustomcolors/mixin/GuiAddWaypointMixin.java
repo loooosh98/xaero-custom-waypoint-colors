@@ -35,21 +35,21 @@ public class GuiAddWaypointMixin {
     @Shadow private MinimapWorld defaultWorld;
 
     // Pre-save keys for detecting renames / coord changes.
-    @Unique private WaypointSnapshot[] xcc_prev;
+    @Unique private WaypointSnapshot[] xcwc_prev;
 
     // OK button handler, this is where Xaero makes new waypoints or updates existing ones
     // lambda$init$0 is auto generated so double check the name on every Xaero update
     @Inject(method = "lambda$init$0", at = @At("HEAD"))
-    private void xcc_enterSave(ClientConfigManager config, Button btn, CallbackInfo ci) {
-        xcc_prev = null;
+    private void xcwc_enterSave(ClientConfigManager config, Button btn, CallbackInfo ci) {
+        xcwc_prev = null;
         if (waypointsEdited == null) return;
         String srcCtx = XaeroContext.forMinimapWorld(defaultWorld);
         int n = waypointsEdited.size();
-        xcc_prev = new WaypointSnapshot[n];
+        xcwc_prev = new WaypointSnapshot[n];
         for (int i = 0; i < n; i++) {
             Waypoint wp = waypointsEdited.get(i);
             String ctx = srcCtx != null ? srcCtx : XaeroContext.forWaypoint(wp);
-            xcc_prev[i] = new WaypointSnapshot(ctx, CustomColorManager.wpKey(wp),
+            xcwc_prev[i] = new WaypointSnapshot(ctx, CustomColorManager.wpKey(wp),
                     ctx == null ? null : CustomColorManager.INSTANCE.getCustomColor(ctx, wp),
                     wp.getWaypointColor());
         }
@@ -57,7 +57,7 @@ public class GuiAddWaypointMixin {
     }
 
     @Inject(method = "lambda$init$0", at = @At("RETURN"))
-    private void xcc_applyCustomColor(ClientConfigManager config, Button btn, CallbackInfo ci) {
+    private void xcwc_applyCustomColor(ClientConfigManager config, Button btn, CallbackInfo ci) {
         try {
             if (waypointsEdited == null || waypointsEdited.isEmpty()) return;
 
@@ -78,7 +78,7 @@ public class GuiAddWaypointMixin {
             int n = waypointsEdited.size();
             for (int i = 0; i < n; i++) {
                 Waypoint wp = waypointsEdited.get(i);
-                WaypointSnapshot prev = (xcc_prev != null && i < xcc_prev.length) ? xcc_prev[i] : null;
+                WaypointSnapshot prev = (xcwc_prev != null && i < xcwc_prev.length) ? xcwc_prev[i] : null;
                 if (wp.isThirdParty()) continue;
                 String ctx = destCtx != null ? destCtx : XaeroContext.forWaypoint(wp);
                 if (ctx == null && prev != null) ctx = prev.ctx();
@@ -116,7 +116,7 @@ public class GuiAddWaypointMixin {
             ColorInterceptState.pendingCustomHex.remove();
             WaypointScreenState.customColor = null;
             WaypointScreenState.customSelected = false;
-            xcc_prev = null;
+            xcwc_prev = null;
         }
     }
 
@@ -125,7 +125,7 @@ public class GuiAddWaypointMixin {
         at = @At("HEAD"),
         cancellable = true
     )
-    private void xcc_handleColorDD(
+    private void xcwc_handleColorDD(
             DropDownWidget dd, int index,
             CallbackInfoReturnable<Boolean> cir) {
         if (dd != colorDD) return;

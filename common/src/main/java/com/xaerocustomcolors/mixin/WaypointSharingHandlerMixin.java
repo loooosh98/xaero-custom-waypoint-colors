@@ -18,7 +18,7 @@ public class WaypointSharingHandlerMixin {
     @Shadow private Waypoint sharedWaypoint;
 
     @ModifyVariable(method = "onShareConfirmationResult", at = @At("STORE"), index = 3)
-    private String xcc_appendColor(String shareStr) {
+    private String xcwc_appendColor(String shareStr) {
         if (shareStr == null || sharedWaypoint == null) return shareStr;
         if (!shareStr.startsWith("xaero-waypoint:") && !shareStr.startsWith("xaero_waypoint:")) return shareStr;
 
@@ -29,7 +29,7 @@ public class WaypointSharingHandlerMixin {
     }
 
     @Inject(method = "onWaypointAdd", at = @At("HEAD"))
-    private void xcc_captureReceivedColor(String[] parts, CallbackInfo ci) {
+    private void xcwc_captureReceivedColor(String[] parts, CallbackInfo ci) {
         if (parts == null || parts.length == 0) return;
         String last = parts[parts.length - 1];
         if (last == null || !last.startsWith("xcc=")) return;

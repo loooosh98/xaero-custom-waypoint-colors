@@ -6,3 +6,6 @@ pluginManagement {
 }
 
 rootProject.name = "xaero-custom-waypoint-colors"
+
+include("common")
+include("fabric")
