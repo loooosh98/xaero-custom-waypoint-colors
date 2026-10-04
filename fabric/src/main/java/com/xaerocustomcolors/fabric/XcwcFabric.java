@@ -10,7 +10,7 @@ public class XcwcFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        XcwcPlatform.init(FabricLoader.getInstance().getGameDir());
+        XcwcPlatform.init(FabricLoader.getInstance().getGameDir(), FabricLoader.getInstance().getConfigDir());
         ScreenEvents.AFTER_INIT.register(
                 (client, screen, scaledWidth, scaledHeight) -> XaeroCustomColors.onScreenInit(screen));
     }

@@ -7,6 +7,7 @@ val FABRIC_LOADER_VERSION: String by rootProject.extra
 val FABRIC_API_VERSION: String by rootProject.extra
 val MINIMAP_VERSION: String by rootProject.extra
 val WORLDMAP_VERSION: String by rootProject.extra
+val MODMENU_VERSION: String by rootProject.extra
 val ARCHIVE_NAME: String by rootProject.extra
 
 base {
@@ -24,6 +25,7 @@ dependencies {
 
     compileOnly("maven.modrinth:xaeros-minimap:fabric-$MINECRAFT_VERSION-$MINIMAP_VERSION")
     compileOnly("maven.modrinth:xaeros-world-map:fabric-$MINECRAFT_VERSION-$WORLDMAP_VERSION")
+    compileOnly("maven.modrinth:modmenu:$MODMENU_VERSION")
 
     compileOnly(common)
 
