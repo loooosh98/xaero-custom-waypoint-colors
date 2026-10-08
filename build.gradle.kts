@@ -10,7 +10,7 @@ extra["MINIMAP_VERSION"]       = "26.2.0"
 extra["WORLDMAP_VERSION"]      = "1.42.0"
 extra["MODMENU_VERSION"]       = "20.0.0"
 
-extra["MOD_VERSION"]           = "1.0.6-26.2"
+extra["MOD_VERSION"]           = "1.0.7-26.2"
 extra["MAVEN_GROUP"]           = "com.xaerocustomcolors"
 extra["ARCHIVE_NAME"]          = "xaero-custom-waypoint-colors"
 
