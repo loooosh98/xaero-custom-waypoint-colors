@@ -1,5 +1,6 @@
 package com.xaerocustomcolors.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.cursor.CursorType;
 import com.mojang.blaze3d.platform.cursor.CursorTypes;
@@ -12,7 +13,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 import java.util.function.Consumer;
 
@@ -205,7 +206,7 @@ public class ColorPickerScreen extends Screen {
     private static CursorType resizeCursor() {
         if (resizeCursor == null) {
             resizeCursor = CursorType.createStandardCursor(
-                    GLFW.GLFW_RESIZE_NWSE_CURSOR, "resize_nwse", CursorTypes.RESIZE_ALL);
+                    SDLMouse.SDL_SYSTEM_CURSOR_NWSE_RESIZE, "resize_nwse", CursorTypes.RESIZE_ALL);
         }
         return resizeCursor;
     }
@@ -306,7 +307,7 @@ public class ColorPickerScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean shifted) {
         if (editing) {
-            if (click.button() == 0 && onHandle(click.x(), click.y())) {
+            if (click.button() == InputConstants.MOUSE_BUTTON_LEFT && onHandle(click.x(), click.y())) {
                 draggingHandle = true;
                 grabOffset = scale - scaleAt(click.x(), click.y());
                 return true;
@@ -315,7 +316,7 @@ public class ColorPickerScreen extends Screen {
         }
         click = toView(click);
         double mx = click.x(), my = click.y();
-        if (click.button() == 0) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             if (inSV(mx, my)) {
                 draggingSV = true;
                 applySV(mx, my);

@@ -1,16 +1,16 @@
 plugins {
-    id("net.fabricmc.fabric-loom") version "1.16.1" apply false
+    id("net.fabricmc.fabric-loom") version "1.17.21" apply false
 }
 
-extra["MINECRAFT_VERSION"]     = "26.2"
-extra["FABRIC_LOADER_VERSION"] = "0.19.2"
-extra["FABRIC_API_VERSION"]    = "0.152.1+26.2"
+extra["MINECRAFT_VERSION"]     = "26.3"
+extra["FABRIC_LOADER_VERSION"] = "0.19.5"
+extra["FABRIC_API_VERSION"]    = "0.160.5+26.3"
 
-extra["MINIMAP_VERSION"]       = "26.2.0"
-extra["WORLDMAP_VERSION"]      = "1.42.0"
-extra["MODMENU_VERSION"]       = "20.0.0"
+extra["MINIMAP_VERSION"]       = "26.6.0"
+extra["WORLDMAP_VERSION"]      = "1.47.0"
+extra["MODMENU_VERSION"]       = "21.0.0"
 
-extra["MOD_VERSION"]           = "1.0.6-26.2"
+extra["MOD_VERSION"]           = "1.0.7-26.3"
 extra["MAVEN_GROUP"]           = "com.xaerocustomcolors"
 extra["ARCHIVE_NAME"]          = "xaero-custom-waypoint-colors"
 
