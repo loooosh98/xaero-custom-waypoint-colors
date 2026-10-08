@@ -10,6 +10,7 @@ val loader_version: String by project
 val fabric_version: String by project
 val minimap_version: String by project
 val worldmap_version: String by project
+val modmenu_version: String by project
 
 version = mod_version
 group = maven_group
@@ -32,6 +33,7 @@ dependencies {
 
     compileOnly("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
     compileOnly("maven.modrinth:xaeros-world-map:fabric-$minecraft_version-$worldmap_version")
+    compileOnly("maven.modrinth:modmenu:$modmenu_version")
 
     xaerolibSource("maven.modrinth:xaeros-minimap:fabric-$minecraft_version-$minimap_version")
 }

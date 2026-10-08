@@ -30,11 +30,14 @@ public class GuiWaypointsMixin {
                 if (!wp.isTemporary()) return;
             }
 
+            int removed = 0;
             for (Waypoint wp : selected) {
                 String ctx = XaeroContext.forWaypoint(wp);
                 if (ctx == null) continue;
-                CustomColorManager.INSTANCE.removeCustomColor(ctx, wp);
+                if (CustomColorManager.INSTANCE.removeCustomColor(ctx, wp)) removed++;
             }
+
+            if (removed > 0) XaeroCustomColors.LOGGER.info("[XCWC] Custom waypoint color deleted ({})", removed);
         } catch (Exception e) {
             XaeroCustomColors.LOGGER.error("[XCWC] Failed to clean up deleted waypoint colors", e);
         }

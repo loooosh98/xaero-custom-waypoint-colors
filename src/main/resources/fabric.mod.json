@@ -18,6 +18,9 @@
   "entrypoints": {
     "client": [
       "com.xaerocustomcolors.XaeroCustomColors"
+    ],
+    "modmenu": [
+      "com.xaerocustomcolors.XcwcModMenu"
     ]
   },
   "mixins": [
@@ -31,6 +34,7 @@
     "xaerominimap": ">=${minimap_version}"
   },
   "suggests": {
-    "xaeroworldmap": "*"
+    "xaeroworldmap": "*",
+    "modmenu": "*"
   }
 }

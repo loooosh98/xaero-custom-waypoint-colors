@@ -5,8 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.ARGB;
+import org.apache.commons.io.file.PathUtils;
 import xaero.common.minimap.waypoints.Waypoint;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
@@ -56,13 +58,17 @@ public class CustomColorManager {
         return migrateFromLegacy(ctxPath, key);
     }
 
-    public void setCustomColor(String ctxPath, Waypoint wp, int argbColor) {
-        if (ctxPath == null || wp == null) return;
+    public boolean setCustomColor(String ctxPath, Waypoint wp, int argbColor) {
+        if (ctxPath == null || wp == null) return false;
         Map<String, Integer> bucket = loadBucket(ctxPath);
-        bucket.put(wpKey(wp), ARGB.opaque(argbColor));
+        String key = wpKey(wp);
+        int color = ARGB.opaque(argbColor);
+        Integer old = bucket.get(key);
+        if (old != null && old.intValue() == color) return false;
+        bucket.put(key, color);
         version.incrementAndGet();
         saveBucket(ctxPath);
-        LOGGER.info("[XCWC] Custom waypoint color saved successfully");
+        return true;
     }
 
     public boolean removeCustomColor(String ctxPath, Waypoint wp) {
@@ -76,9 +82,28 @@ public class CustomColorManager {
         if (had) {
             version.incrementAndGet();
             saveBucket(ctxPath);
-            LOGGER.info("[XCWC] Custom waypoint color deleted");
         }
         return had;
+    }
+
+    public void deleteContainer(String containerNode) {
+        if (containerNode == null || containerNode.isEmpty()) return;
+        Path root = FabricLoader.getInstance().getGameDir().resolve(ROOT_DIR).normalize();
+        Path target = bucketDir(containerNode).normalize();
+        if (!root.equals(target.getParent())) return;
+
+        String prefix = containerNode + "/";
+        if (bucketsByCtx.keySet().removeIf(ctx -> ctx.equals(containerNode) || ctx.startsWith(prefix))) {
+            version.incrementAndGet();
+        }
+
+        if (!Files.isDirectory(target)) return;
+        try {
+            PathUtils.deleteDirectory(target);
+            LOGGER.info("[XCWC] Deleted world folder for ({})", containerNode);
+        } catch (IOException e) {
+            LOGGER.error("[XCWC] Failed to delete custom color folder " + target, e);
+        }
     }
 
     private Integer migrateFromLegacy(String ctxPath, String wpKey) {
@@ -162,13 +187,17 @@ public class CustomColorManager {
         }
     }
 
-    private Path bucketFile(String ctxPath) {
+    private Path bucketDir(String ctxPath) {
         Path target = FabricLoader.getInstance().getGameDir().resolve(ROOT_DIR);
         for (String seg : ctxPath.split("/")) {
             if (seg.isEmpty()) continue;
             target = target.resolve(sanitize(seg));
         }
-        return target.resolve(COLOR_FILE);
+        return target;
+    }
+
+    private Path bucketFile(String ctxPath) {
+        return bucketDir(ctxPath).resolve(COLOR_FILE);
     }
 
     private Path legacyFile() {
