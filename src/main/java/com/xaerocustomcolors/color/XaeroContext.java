@@ -7,6 +7,7 @@ import xaero.hud.minimap.waypoint.set.WaypointSet;
 import xaero.hud.minimap.world.MinimapWorld;
 import xaero.hud.minimap.world.MinimapWorldManager;
 import xaero.hud.minimap.world.container.MinimapWorldContainer;
+import xaero.hud.minimap.world.container.MinimapWorldContainerUtil;
 import xaero.hud.minimap.world.container.MinimapWorldRootContainer;
 
 public final class XaeroContext {
@@ -33,6 +34,11 @@ public final class XaeroContext {
             }
         } catch (Throwable ignored) {}
         return null;
+    }
+
+    public static String forWorldFolder(String worldFolderName) {
+        if (worldFolderName == null || worldFolderName.isEmpty()) return null;
+        return MinimapWorldContainerUtil.convertWorldFolderToContainerNode(worldFolderName);
     }
 
     public static String forWaypoint(Waypoint wp) {

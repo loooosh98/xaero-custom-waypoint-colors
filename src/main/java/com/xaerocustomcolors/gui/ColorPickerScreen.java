@@ -227,7 +227,7 @@ public class ColorPickerScreen extends Screen {
     private void onHexInput(String text) {
         if (updatingFields) return;
         String t = text.startsWith("#") ? text.substring(1) : text;
-        if (t.length() == 6) {
+        if (t.length() == 6 && t.charAt(0) != '-' && t.charAt(0) != '+') {
             try {
                 fromArgb(0xFF000000 | Integer.parseInt(t, 16));
                 selectColor();
