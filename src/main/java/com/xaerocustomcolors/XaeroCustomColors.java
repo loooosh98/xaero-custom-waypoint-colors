@@ -8,10 +8,10 @@ import com.xaerocustomcolors.mixin.GuiAddWaypointAccessor;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xaero.common.gui.GuiAddWaypoint;
@@ -25,7 +25,7 @@ import java.util.Arrays;
 public class XaeroCustomColors implements ClientModInitializer {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("xaerocustomwaypointcolors");
-    public static final String CUSTOM_COLOR_LABEL = Formatting.GRAY + "Custom";
+    public static final String CUSTOM_COLOR_LABEL = ChatFormatting.GRAY + "Custom";
 
     private static WeakReference<Screen> lastEditScreen;
 
@@ -69,13 +69,13 @@ public class XaeroCustomColors implements ClientModInitializer {
     public static void openColorPicker(Screen parent) {
         Integer c = WaypointScreenState.customColor;
         int initial = c != null ? c : 0;
-        MinecraftClient.getInstance().setScreen(new ColorPickerScreen(parent, initial, chosen -> {
+        Minecraft.getInstance().setScreen(new ColorPickerScreen(parent, initial, chosen -> {
             WaypointScreenState.customColor = chosen;
         }));
     }
 
     public static String formatCustomLabel(int argb) {
-        return Formatting.GRAY + "Custom: #" + String.format("%06X", argb & 0xFFFFFF);
+        return ChatFormatting.GRAY + "Custom: #" + String.format("%06X", argb & 0xFFFFFF);
     }
 
     private static void appendCustomDropdownEntry(GuiAddWaypoint screen, String text, boolean select) {
@@ -84,16 +84,16 @@ public class XaeroCustomColors implements ClientModInitializer {
             if (colorDD == null) return;
             DropDownWidgetAccessor dd = (DropDownWidgetAccessor) colorDD;
 
-            Text label = Text.literal(text);
-            Text[] realOptions = dd.xcc_getRealOptions();
-            Text[] options = dd.xcc_getOptions();
+            Component label = Component.literal(text);
+            Component[] realOptions = dd.xcc_getRealOptions();
+            Component[] options = dd.xcc_getOptions();
 
             int customRealIndex = realOptions.length;
-            Text[] newReal = Arrays.copyOf(realOptions, customRealIndex + 1);
+            Component[] newReal = Arrays.copyOf(realOptions, customRealIndex + 1);
             newReal[customRealIndex] = label;
             dd.xcc_setRealOptions(newReal);
 
-            Text[] newOpts = Arrays.copyOf(options, options.length + 1);
+            Component[] newOpts = Arrays.copyOf(options, options.length + 1);
             newOpts[options.length] = label;
             dd.xcc_setOptions(newOpts);
 

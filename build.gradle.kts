@@ -6,7 +6,6 @@ val mod_version: String by project
 val maven_group: String by project
 val archives_base_name: String by project
 val minecraft_version: String by project
-val yarn_mappings: String by project
 val loader_version: String by project
 val fabric_version: String by project
 val minimap_version: String by project
@@ -28,7 +27,7 @@ val xaerolibSource: Configuration by configurations.creating
 
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft_version")
-    mappings("net.fabricmc:yarn:$yarn_mappings:v2")
+    mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 
