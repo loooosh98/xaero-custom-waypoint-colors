@@ -1,13 +1,13 @@
 package com.xaerocustomcolors.gui;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import com.mojang.math.Axis;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
@@ -36,9 +36,9 @@ public class ColorPickerScreen extends Screen {
     private int svX, svY;
     private int hueX, hueY, hueBarW;
 
-    private TextFieldWidget hexField;
-    private TextFieldWidget rField, gField, bField;
-    private ButtonWidget okButton;
+    private EditBox hexField;
+    private EditBox rField, gField, bField;
+    private Button okButton;
 
     private boolean hasColor = false;
     private boolean draggingSV  = false;
@@ -46,7 +46,7 @@ public class ColorPickerScreen extends Screen {
     private boolean updatingFields = false;
 
     public ColorPickerScreen(Screen parent, int initialArgb, Consumer<Integer> callback) {
-        super(Text.literal("Custom Waypoint Color"));
+        super(Component.literal("Custom Waypoint Color"));
         this.parent   = parent;
         this.callback = callback;
         hasColor = initialArgb != 0;
@@ -65,40 +65,40 @@ public class ColorPickerScreen extends Screen {
 
         int fieldsY = hueY + HUE_BAR_H + 12;
 
-        hexField = new TextFieldWidget(textRenderer, panelX + PADDING, fieldsY, 115, 16,
-                Text.literal("Hex"));
+        hexField = new EditBox(font, panelX + PADDING, fieldsY, 115, 16,
+                Component.literal("Hex"));
         hexField.setMaxLength(7);
-        hexField.setChangedListener(this::onHexInput);
-        hexField.setPlaceholder(Text.literal("#FFFFFF").formatted(Formatting.GRAY));
-        addDrawableChild(hexField);
+        hexField.setResponder(this::onHexInput);
+        hexField.setHint(Component.literal("#FFFFFF").withStyle(ChatFormatting.GRAY));
+        addRenderableWidget(hexField);
 
         int compW = 40;
         int compY = fieldsY + 24;
-        rField = new TextFieldWidget(textRenderer, panelX + PADDING,          compY, compW, 16, Text.literal("R"));
-        gField = new TextFieldWidget(textRenderer, panelX + PADDING + 44,     compY, compW, 16, Text.literal("G"));
-        bField = new TextFieldWidget(textRenderer, panelX + PADDING + 88,     compY, compW, 16, Text.literal("B"));
-        for (TextFieldWidget f : new TextFieldWidget[]{ rField, gField, bField }) {
+        rField = new EditBox(font, panelX + PADDING,          compY, compW, 16, Component.literal("R"));
+        gField = new EditBox(font, panelX + PADDING + 44,     compY, compW, 16, Component.literal("G"));
+        bField = new EditBox(font, panelX + PADDING + 88,     compY, compW, 16, Component.literal("B"));
+        for (EditBox f : new EditBox[]{ rField, gField, bField }) {
             f.setMaxLength(3);
-            f.setChangedListener(s -> onRgbInput());
-            f.setPlaceholder(Text.literal("255").formatted(Formatting.GRAY));
-            addDrawableChild(f);
+            f.setResponder(s -> onRgbInput());
+            f.setHint(Component.literal("255").withStyle(ChatFormatting.GRAY));
+            addRenderableWidget(f);
         }
 
         int btnY = panelY + PANEL_H - 28;
         int btnW = (PANEL_W - PADDING * 3) / 2;
-        okButton = addDrawableChild(ButtonWidget.builder(Text.literal("OK"), b -> {
+        okButton = addRenderableWidget(Button.builder(Component.literal("OK"), b -> {
             callback.accept(getCurrentArgb());
-            close();
-        }).dimensions(panelX + PADDING, btnY, btnW, 20).build());
+            onClose();
+        }).bounds(panelX + PADDING, btnY, btnW, 20).build());
         okButton.active = hasColor;
-        addDrawableChild(ButtonWidget.builder(Text.literal("Cancel"), b -> close())
-                .dimensions(panelX + PADDING * 2 + btnW, btnY, btnW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
+                .bounds(panelX + PADDING * 2 + btnW, btnY, btnW, 20).build());
 
         if (hasColor) refreshFields();
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         this.renderBackground(ctx);
 
         // Panel background + border
@@ -142,25 +142,25 @@ public class ColorPickerScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
     }
 
-    private void drawSVSquare(DrawContext ctx) {
-        ctx.getMatrices().push();
-        ctx.getMatrices().translate(svX, svY + PICKER_SIZE, 0);
-        ctx.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-90));
+    private void drawSVSquare(GuiGraphics ctx) {
+        ctx.pose().pushPose();
+        ctx.pose().translate(svX, svY + PICKER_SIZE, 0);
+        ctx.pose().mulPose(Axis.ZP.rotationDegrees(-90));
         ctx.fillGradient(0, 0, PICKER_SIZE, PICKER_SIZE, 0xFFFFFFFF, hsvToArgb(hue, 1f, 1f));
-        ctx.getMatrices().pop();
+        ctx.pose().popPose();
         ctx.fillGradient(svX, svY, svX + PICKER_SIZE, svY + PICKER_SIZE, 0x00000000, 0xFF000000);
     }
 
-    private void drawHueBar(DrawContext ctx) {
-        ctx.getMatrices().push();
-        ctx.getMatrices().translate(hueX, hueY + HUE_BAR_H, 0);
-        ctx.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-90));
+    private void drawHueBar(GuiGraphics ctx) {
+        ctx.pose().pushPose();
+        ctx.pose().translate(hueX, hueY + HUE_BAR_H, 0);
+        ctx.pose().mulPose(Axis.ZP.rotationDegrees(-90));
         for (int i = 0; i < 6; i++) {
             int y1 = Math.round(i * (hueBarW / 6f));
             int y2 = Math.round((i + 1) * (hueBarW / 6f));
             ctx.fillGradient(0, y1, HUE_BAR_H, y2, HUE_STOPS[i], HUE_STOPS[i + 1]);
         }
-        ctx.getMatrices().pop();
+        ctx.pose().popPose();
     }
 
     @Override
@@ -196,7 +196,7 @@ public class ColorPickerScreen extends Screen {
     }
 
     @Override
-    public boolean shouldPause() { return true; }
+    public boolean isPauseScreen() { return true; }
 
     private boolean inSV(double mx, double my) {
         return mx >= svX && mx < svX + PICKER_SIZE && my >= svY && my < svY + PICKER_SIZE;
@@ -207,14 +207,14 @@ public class ColorPickerScreen extends Screen {
     }
 
     private void applySV(double mx, double my) {
-        sat = MathHelper.clamp((float)(mx - svX) / (PICKER_SIZE - 1), 0f, 1f);
-        val = MathHelper.clamp(1f - (float)(my - svY) / (PICKER_SIZE - 1), 0f, 1f);
+        sat = Mth.clamp((float)(mx - svX) / (PICKER_SIZE - 1), 0f, 1f);
+        val = Mth.clamp(1f - (float)(my - svY) / (PICKER_SIZE - 1), 0f, 1f);
         selectColor();
         refreshFields();
     }
 
     private void applyHue(double mx) {
-        hue = MathHelper.clamp((float)(mx - hueX) / (hueBarW - 1), 0f, 1f);
+        hue = Mth.clamp((float)(mx - hueX) / (hueBarW - 1), 0f, 1f);
         selectColor();
         refreshFields();
     }
@@ -241,19 +241,19 @@ public class ColorPickerScreen extends Screen {
     private void onRgbInput() {
         if (updatingFields) return;
         try {
-            int rRaw = Integer.parseInt(rField.getText().trim());
-            int gRaw = Integer.parseInt(gField.getText().trim());
-            int bRaw = Integer.parseInt(bField.getText().trim());
-            int r = MathHelper.clamp(rRaw, 0, 255);
-            int g = MathHelper.clamp(gRaw, 0, 255);
-            int b = MathHelper.clamp(bRaw, 0, 255);
+            int rRaw = Integer.parseInt(rField.getValue().trim());
+            int gRaw = Integer.parseInt(gField.getValue().trim());
+            int bRaw = Integer.parseInt(bField.getValue().trim());
+            int r = Mth.clamp(rRaw, 0, 255);
+            int g = Mth.clamp(gRaw, 0, 255);
+            int b = Mth.clamp(bRaw, 0, 255);
             fromArgb(0xFF000000 | (r << 16) | (g << 8) | b);
             selectColor();
             updatingFields = true;
-            if (r != rRaw) rField.setText(String.valueOf(r));
-            if (g != gRaw) gField.setText(String.valueOf(g));
-            if (b != bRaw) bField.setText(String.valueOf(b));
-            hexField.setText(String.format("#%02X%02X%02X", r, g, b));
+            if (r != rRaw) rField.setValue(String.valueOf(r));
+            if (g != gRaw) gField.setValue(String.valueOf(g));
+            if (b != bRaw) bField.setValue(String.valueOf(b));
+            hexField.setValue(String.format("#%02X%02X%02X", r, g, b));
             updatingFields = false;
         } catch (NumberFormatException ignored) {}
     }
@@ -262,15 +262,15 @@ public class ColorPickerScreen extends Screen {
         if (updatingFields || hexField == null) return;
         int argb = getCurrentArgb();
         updatingFields = true;
-        hexField.setText(String.format("#%02X%02X%02X", (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF));
+        hexField.setValue(String.format("#%02X%02X%02X", (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF));
         setRgbFields(argb);
         updatingFields = false;
     }
 
     private void setRgbFields(int argb) {
-        rField.setText(String.valueOf((argb >> 16) & 0xFF));
-        gField.setText(String.valueOf((argb >>  8) & 0xFF));
-        bField.setText(String.valueOf( argb        & 0xFF));
+        rField.setValue(String.valueOf((argb >> 16) & 0xFF));
+        gField.setValue(String.valueOf((argb >>  8) & 0xFF));
+        bField.setValue(String.valueOf( argb        & 0xFF));
     }
 
     private int getCurrentArgb() {
@@ -316,7 +316,7 @@ public class ColorPickerScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        client.setScreen(parent);
+    public void onClose() {
+        minecraft.setScreen(parent);
     }
 }

@@ -6,8 +6,8 @@ import com.xaerocustomcolors.color.XaeroContext;
 import com.xaerocustomcolors.state.ColorInterceptState;
 import com.xaerocustomcolors.state.WaypointScreenState;
 import com.xaerocustomcolors.state.WaypointSnapshot;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -34,7 +34,7 @@ public class GuiAddWaypointMixin {
     // OK button handler, this is where Xaero makes new waypoints or updates existing ones
     // lambda$init$5 is auto generated so double check the name on every Xaero update
     @Inject(method = "lambda$init$5", at = @At("HEAD"))
-    private void xcc_enterSave(ClientConfigManager config, ButtonWidget btn, CallbackInfo ci) {
+    private void xcc_enterSave(ClientConfigManager config, Button btn, CallbackInfo ci) {
         xcc_prev = null;
         if (waypointsEdited == null) return;
         int n = waypointsEdited.size();
@@ -50,7 +50,7 @@ public class GuiAddWaypointMixin {
     }
 
     @Inject(method = "lambda$init$5", at = @At("RETURN"))
-    private void xcc_applyCustomColor(ClientConfigManager config, ButtonWidget btn, CallbackInfo ci) {
+    private void xcc_applyCustomColor(ClientConfigManager config, Button btn, CallbackInfo ci) {
         try {
             if (waypointsEdited == null || waypointsEdited.isEmpty()) return;
 
