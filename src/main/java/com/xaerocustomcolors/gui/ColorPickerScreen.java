@@ -3,11 +3,14 @@ package com.xaerocustomcolors.gui;
 import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
 
@@ -18,6 +21,8 @@ public class ColorPickerScreen extends Screen {
     private static final int PICKER_SIZE = PANEL_W - PADDING * 2; // fills panel width
     private static final int HUE_BAR_H  = 14;
     private static final int PANEL_H    = 311;
+    private static long handCursor, notAllowedCursor, textCursor;
+    private static boolean cursorsMade;
     private static final int[] HUE_STOPS = new int[7];
     static {
         for (int i = 0; i < 7; i++) HUE_STOPS[i] = hsvToArgb(i / 6f, 1f, 1f);
@@ -44,6 +49,7 @@ public class ColorPickerScreen extends Screen {
     private boolean draggingSV  = false;
     private boolean draggingHue = false;
     private boolean updatingFields = false;
+    private long currentCursor;
 
     public ColorPickerScreen(Screen parent, int initialArgb, Consumer<Integer> callback) {
         super(Component.literal("Custom Waypoint Color"));
@@ -140,6 +146,7 @@ public class ColorPickerScreen extends Screen {
         }
 
         super.render(ctx, mouseX, mouseY, delta);
+        updateCursor();
     }
 
     private void drawSVSquare(GuiGraphics ctx) {
@@ -161,6 +168,29 @@ public class ColorPickerScreen extends Screen {
             ctx.fillGradient(0, y1, HUE_BAR_H, y2, HUE_STOPS[i], HUE_STOPS[i + 1]);
         }
         ctx.pose().popPose();
+    }
+
+    private void updateCursor() {
+        if (!cursorsMade) {
+            handCursor       = GLFW.glfwCreateStandardCursor(GLFW.GLFW_HAND_CURSOR);
+            notAllowedCursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_NOT_ALLOWED_CURSOR);
+            textCursor       = GLFW.glfwCreateStandardCursor(GLFW.GLFW_IBEAM_CURSOR);
+            cursorsMade = true;
+        }
+        long wanted = 0;
+        for (GuiEventListener child : children()) {
+            if (child instanceof AbstractWidget w && w.isHovered()) {
+                wanted = w instanceof EditBox ? textCursor : w.isActive() ? handCursor : notAllowedCursor;
+            }
+        }
+        setCursor(wanted);
+    }
+
+    private void setCursor(long cursor) {
+        if (currentCursor != cursor) {
+            currentCursor = cursor;
+            GLFW.glfwSetCursor(minecraft.getWindow().getWindow(), cursor);
+        }
     }
 
     @Override
@@ -318,5 +348,10 @@ public class ColorPickerScreen extends Screen {
     @Override
     public void onClose() {
         minecraft.setScreen(parent);
+    }
+
+    @Override
+    public void removed() {
+        setCursor(0);
     }
 }
