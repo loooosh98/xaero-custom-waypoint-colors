@@ -21,7 +21,7 @@ public class ColorPickerScreen extends Screen {
     private static final int PICKER_SIZE = PANEL_W - PADDING * 2; // fills panel width
     private static final int HUE_BAR_H  = 14;
     private static final int PANEL_H    = 311;
-    private static long handCursor, notAllowedCursor, textCursor;
+    private static long notAllowedCursor, textCursor;
     private static boolean cursorsMade;
     private static final int[] HUE_STOPS = new int[7];
     static {
@@ -172,7 +172,6 @@ public class ColorPickerScreen extends Screen {
 
     private void updateCursor() {
         if (!cursorsMade) {
-            handCursor       = GLFW.glfwCreateStandardCursor(GLFW.GLFW_HAND_CURSOR);
             notAllowedCursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_NOT_ALLOWED_CURSOR);
             textCursor       = GLFW.glfwCreateStandardCursor(GLFW.GLFW_IBEAM_CURSOR);
             cursorsMade = true;
@@ -180,7 +179,7 @@ public class ColorPickerScreen extends Screen {
         long wanted = 0;
         for (GuiEventListener child : children()) {
             if (child instanceof AbstractWidget w && w.isHovered()) {
-                wanted = w instanceof EditBox ? textCursor : w.isActive() ? handCursor : notAllowedCursor;
+                wanted = w instanceof EditBox ? textCursor : w.isActive() ? 0 : notAllowedCursor;
             }
         }
         setCursor(wanted);
